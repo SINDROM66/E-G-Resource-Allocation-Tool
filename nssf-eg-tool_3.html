@@ -1,0 +1,1695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>E&amp;G Deployment Ledger — NSSF Uganda</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --ink:#12201A;
+    --forest:#123A2C;
+    --forest-2:#1E5A43;
+    --forest-3:#2C7357;
+    --gold:#C79A3E;
+    --gold-deep:#A87E2C;
+    --paper:#F6F2E7;
+    --paper-2:#EFE9D8;
+    --line:#D8CFB8;
+    --line-soft:#E6E0CD;
+    --red:#A2402E;
+    --red-soft:#F3E1DC;
+    --green-soft:#E1EADB;
+    --white:#FFFDF8;
+    --shadow: 0 1px 2px rgba(18,32,26,0.06), 0 6px 20px rgba(18,32,26,0.05);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0; overflow-x:hidden;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  #root{min-height:100vh;}
+  h1,h2,h3,.display{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    letter-spacing:-0.01em;
+  }
+  .mono{font-family:'IBM Plex Mono', monospace;}
+  ::selection{background:var(--gold); color:var(--forest);}
+
+  /* ---------- shell ---------- */
+  .shell{display:flex; min-height:100vh;}
+  .rail{
+    width:248px; flex-shrink:0;
+    background:var(--forest);
+    color:var(--paper);
+    padding:28px 0 20px;
+    display:flex; flex-direction:column;
+    position:sticky; top:0; height:100vh;
+  }
+  .rail-brand{padding:0 24px 22px; border-bottom:1px solid rgba(246,242,231,0.14); margin-bottom:18px;}
+  .rail-brand .mark{
+    font-family:'Fraunces', serif; font-weight:700; font-size:20px; color:var(--gold);
+    letter-spacing:0.01em;
+  }
+  .rail-brand .sub{font-size:11px; color:rgba(246,242,231,0.6); margin-top:4px; letter-spacing:0.04em; text-transform:uppercase;}
+  .nav-item{
+    display:flex; align-items:baseline; gap:10px;
+    padding:11px 24px; cursor:pointer;
+    color:rgba(246,242,231,0.78);
+    font-size:14.5px; font-weight:500;
+    border-left:3px solid transparent;
+    transition:all .15s ease;
+  }
+  .nav-item .idx{font-family:'IBM Plex Mono',monospace; font-size:11px; color:rgba(246,242,231,0.4); width:16px;}
+  .nav-item:hover{background:rgba(246,242,231,0.06); color:var(--paper);}
+  .nav-item.active{
+    background:rgba(199,154,62,0.14);
+    border-left-color:var(--gold);
+    color:var(--white);
+  }
+  .nav-item.active .idx{color:var(--gold);}
+  .rail-foot{margin-top:auto; padding:18px 24px 0; border-top:1px solid rgba(246,242,231,0.14);}
+
+  .role-toggle{
+    display:flex; background:rgba(246,242,231,0.08); border-radius:8px; padding:3px; gap:2px;
+  }
+  .role-toggle button{
+    flex:1; border:none; background:transparent; color:rgba(246,242,231,0.65);
+    font-family:'IBM Plex Sans',sans-serif; font-size:12px; font-weight:600;
+    padding:7px 6px; border-radius:6px; cursor:pointer; transition:all .15s ease;
+  }
+  .role-toggle button.active{background:var(--gold); color:var(--forest);}
+  .rail-foot .label{font-size:10.5px; color:rgba(246,242,231,0.45); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:8px;}
+  .who-select{
+    width:100%; margin-top:10px; background:rgba(246,242,231,0.08); color:var(--white);
+    border:1px solid rgba(246,242,231,0.2); border-radius:6px; padding:8px 8px; font-size:13px;
+    font-family:'IBM Plex Sans',sans-serif;
+  }
+  .who-select option{color:var(--ink);}
+
+  .main{flex:1; min-width:0;}
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:22px 36px; border-bottom:1px solid var(--line);
+    background:var(--paper);
+  }
+  .topbar .title{font-size:24px;}
+  .topbar .today{font-size:12.5px; color:#6b6250; font-family:'IBM Plex Mono',monospace;}
+  .content{padding:28px 36px 60px;}
+
+  /* ---------- primitives ---------- */
+  .grid{display:grid; gap:16px;}
+  .cols-4{grid-template-columns:repeat(4,1fr);}
+  .cols-3{grid-template-columns:repeat(3,1fr);}
+  .cols-2{grid-template-columns:repeat(2,1fr);}
+  @media(max-width:1100px){.cols-4{grid-template-columns:repeat(2,1fr);} .cols-3{grid-template-columns:repeat(2,1fr);}}
+
+  .card{
+    background:var(--white); border:1px solid var(--line); border-radius:10px;
+    padding:20px; box-shadow:var(--shadow);
+    overflow-x:auto;
+  }
+  .kpi .num{font-family:'Fraunces',serif; font-size:32px; font-weight:600; color:var(--forest); line-height:1;}
+  .kpi .lbl{font-size:12.5px; color:#6b6250; margin-top:8px; letter-spacing:0.01em;}
+  .kpi .delta{font-size:11.5px; margin-top:6px; font-family:'IBM Plex Mono',monospace;}
+  .up{color:var(--forest-3);} .down{color:var(--red);}
+
+  .section-head{display:flex; align-items:baseline; justify-content:space-between; margin:34px 0 14px;}
+  .section-head:first-child{margin-top:0;}
+  .section-head h2{font-size:19px; margin:0;}
+  .section-head .hint{font-size:12.5px; color:#847a63;}
+
+  .btn{
+    font-family:'IBM Plex Sans',sans-serif; font-weight:600; font-size:13px;
+    border-radius:7px; padding:9px 16px; cursor:pointer; border:1px solid transparent;
+    transition:all .12s ease; display:inline-flex; align-items:center; gap:6px;
+  }
+  .btn-primary{background:var(--forest); color:var(--white);}
+  .btn-primary:hover{background:var(--forest-2);}
+  .btn-gold{background:var(--gold); color:var(--forest);}
+  .btn-gold:hover{background:var(--gold-deep); color:var(--white);}
+  .btn-ghost{background:transparent; border-color:var(--line); color:var(--ink);}
+  .btn-ghost:hover{border-color:var(--forest); color:var(--forest);}
+  .btn-danger{background:transparent; border-color:var(--red); color:var(--red);}
+  .btn-danger:hover{background:var(--red); color:white;}
+  .btn:disabled{opacity:0.45; cursor:not-allowed;}
+  .btn-sm{padding:6px 11px; font-size:12px;}
+
+  .pill{
+    display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:20px;
+    font-size:11px; font-weight:600; letter-spacing:0.02em; text-transform:uppercase;
+  }
+  .pill-dot{width:6px;height:6px;border-radius:50%;}
+  .pill.draft{background:#EFEADC; color:#7A7052;} .pill.draft .pill-dot{background:#A79C7C;}
+  .pill.pending{background:#FBEFD8; color:#8A5F16;} .pill.pending .pill-dot{background:var(--gold-deep);}
+  .pill.approved{background:var(--green-soft); color:var(--forest);} .pill.approved .pill-dot{background:var(--forest-3);}
+  .pill.completed{background:#E4E7F0; color:#3D4C7A;} .pill.completed .pill-dot{background:#5A6DA8;}
+  .pill.urgent{background:var(--red-soft); color:var(--red);} .pill.urgent .pill-dot{background:var(--red);}
+
+  table{width:100%; min-width:760px; border-collapse:collapse;}
+  th{
+    text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:0.05em;
+    color:#8a8065; font-weight:600; padding:0 12px 10px; border-bottom:1px solid var(--line);
+  }
+  td{padding:13px 12px; border-bottom:1px solid var(--line-soft); font-size:13.5px; vertical-align:middle;}
+  tr:last-child td{border-bottom:none;}
+  .ledger-idx{font-family:'IBM Plex Mono',monospace; color:#A79C7C; font-size:12px;}
+
+  .stamp{
+    display:inline-flex; align-items:center; justify-content:center;
+    border:2px solid currentColor; border-radius:6px; padding:3px 9px;
+    font-family:'IBM Plex Mono',monospace; font-size:10.5px; font-weight:700;
+    letter-spacing:0.09em; text-transform:uppercase;
+    line-height:1.5;
+  }
+  .stamp.ok{color:var(--forest-3);}
+  .stamp.wait{color:var(--gold-deep); border-style:dashed;}
+  .stamp.no{color:var(--red);}
+
+  .tag{
+    display:inline-block; padding:2px 8px; border-radius:5px; font-size:11px; font-weight:600;
+    background:var(--paper-2); color:#6b6250; margin:2px 4px 2px 0; border:1px solid var(--line);
+  }
+  .avatar{
+    width:30px; height:30px; border-radius:50%; background:var(--forest); color:var(--gold);
+    display:inline-flex; align-items:center; justify-content:center; font-size:12px; font-weight:700;
+    font-family:'IBM Plex Mono',monospace; flex-shrink:0;
+  }
+  .row-flex{display:flex; align-items:center; gap:10px;}
+  .muted{color:#8a8065;}
+  .divider{height:1px; background:var(--line); margin:22px 0;}
+
+  input, select, textarea{
+    font-family:'IBM Plex Sans',sans-serif; border:1px solid var(--line); border-radius:7px;
+    padding:9px 11px; font-size:13.5px; background:var(--white); color:var(--ink); width:100%;
+  }
+  label{font-size:12px; font-weight:600; color:#5c5442; margin-bottom:6px; display:block; letter-spacing:0.01em;}
+  .field{margin-bottom:16px;}
+
+  .fit-bar{height:6px; border-radius:4px; background:var(--paper-2); overflow:hidden; width:100%;}
+  .fit-bar > div{height:100%; background:var(--forest-3);}
+
+  .match-row{
+    display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid var(--line-soft);
+  }
+  .match-row:last-child{border-bottom:none;}
+  .badge-best{background:var(--gold); color:var(--forest); font-size:10px; font-weight:700; padding:2px 7px; border-radius:4px; text-transform:uppercase; letter-spacing:0.04em;}
+  .badge-good{background:var(--green-soft); color:var(--forest); font-size:10px; font-weight:700; padding:2px 7px; border-radius:4px; text-transform:uppercase; letter-spacing:0.04em;}
+  .badge-consider{background:var(--paper-2); color:#8a8065; font-size:10px; font-weight:700; padding:2px 7px; border-radius:4px; text-transform:uppercase; letter-spacing:0.04em;}
+
+  .empty{
+    text-align:center; padding:50px 20px; color:#a79c7c; border:1px dashed var(--line); border-radius:10px;
+  }
+  .callout{
+    border-left:3px solid var(--gold); background:#FBF6E8; padding:13px 16px; border-radius:0 8px 8px 0;
+    font-size:13px; color:#5c5442; margin-bottom:18px;
+  }
+  .callout.warn{border-left-color:var(--red); background:var(--red-soft); color:#7A2E20;}
+  .modal-back{
+    position:fixed; inset:0; background:rgba(18,32,26,0.45); display:flex; align-items:flex-start;
+    justify-content:center; padding:50px 20px; overflow-y:auto; z-index:50;
+  }
+  .modal{background:var(--white); border-radius:12px; max-width:640px; width:100%; padding:28px; box-shadow:0 20px 60px rgba(0,0,0,0.25);}
+  .modal-head{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:18px;}
+  .x-close{cursor:pointer; color:#8a8065; font-size:20px; border:none; background:none; line-height:1;}
+  .chip-select{display:flex; flex-wrap:wrap; gap:8px;}
+  .chip-select .chip{
+    padding:7px 13px; border:1px solid var(--line); border-radius:20px; font-size:12.5px; cursor:pointer; font-weight:500;
+  }
+  .chip-select .chip.on{background:var(--forest); color:white; border-color:var(--forest);}
+  .other-field{margin-top:8px;}
+  .perdiem-banner{display:flex; gap:14px; border-radius:10px; overflow:hidden; margin-bottom:24px; border:1px solid var(--line);}
+  .perdiem-banner .seg{flex:1; padding:16px 18px; background:var(--white);}
+  .perdiem-banner .seg + .seg{border-left:1px solid var(--line);}
+  .perdiem-banner .seg .n{font-family:'Fraunces',serif; font-size:26px; font-weight:600; line-height:1;}
+  .perdiem-banner .seg .l{font-size:11.5px; color:#8a8065; margin-top:6px;}
+  .perdiem-banner .seg.warn{background:var(--red-soft);}
+  .perdiem-banner .seg.warn .n{color:var(--red);}
+  .perdiem-banner .seg.ok .n{color:var(--forest-3);}
+  .perdiem-banner .seg.wait .n{color:var(--gold-deep);}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script type="text/babel">
+const {useState, useMemo, useEffect} = React;
+
+/* ============================================================
+   MOCK DATA
+   ============================================================ */
+
+const REGIONS = ["Kampala","Wakiso","Mukono","Jinja","Gulu","Mbarara","Mbale"];
+const HARDSHIP_REGIONS = ["Gulu","Jinja","Mbarara"];
+const RATE = {Trainer: 120000, "Account Manager": 130000};
+
+const initials = (name) => name.split(" ").map(p=>p[0]).slice(0,2).join("");
+
+const STAFF = [
+  {id:"S01", name:"Aisha Nabatanzi", role:"Trainer", strength:"Informal", languages:["Luganda","English"], homeRegion:"Kampala", note:"Strong at market & vendor sensitization", formalRate:55, informalRate:88, trips:14, avgOnboard:9.2, status:"Available"},
+  {id:"S02", name:"Peter Okello", role:"Trainer", strength:"Formal", languages:["English","Acholi"], homeRegion:"Gulu", note:"Best with MDAs and school staff", formalRate:84, informalRate:50, trips:11, avgOnboard:7.5, status:"Available"},
+  {id:"S03", name:"Grace Namutebi", role:"Account Manager", strength:"Both", languages:["Luganda","English"], homeRegion:"Kampala", note:"High closer, adapts to any crowd", formalRate:78, informalRate:80, trips:20, avgOnboard:12.1, status:"Available"},
+  {id:"S04", name:"Sam Lubega", role:"Account Manager", strength:"Informal", languages:["Luganda","English"], homeRegion:"Wakiso", note:"Boda boda & transport sector specialist", formalRate:48, informalRate:82, trips:16, avgOnboard:10.4, status:"Deployed"},
+  {id:"S05", name:"Josephine Achen", role:"Trainer", strength:"Formal", languages:["English","Acholi","Luo"], homeRegion:"Gulu", note:"Confident presenter for civil servants", formalRate:80, informalRate:60, trips:9, avgOnboard:6.8, status:"Available"},
+  {id:"S06", name:"Moses Kato", role:"Account Manager", strength:"Formal", languages:["English","Luganda"], homeRegion:"Mukono", note:"Strong with SACCOs & local government", formalRate:86, informalRate:55, trips:13, avgOnboard:9.9, status:"Available"},
+  {id:"S07", name:"Fatuma Nabirye", role:"Trainer", strength:"Both", languages:["Luganda","Swahili","English"], homeRegion:"Jinja", note:"Trusted in fishing & lakeside communities", formalRate:60, informalRate:79, trips:10, avgOnboard:7.1, status:"Available"},
+  {id:"S08", name:"Brian Ssekandi", role:"Account Manager", strength:"Informal", languages:["Luganda","English"], homeRegion:"Kampala", note:"High energy, thrives at market events", formalRate:45, informalRate:85, trips:18, avgOnboard:11.6, status:"Deployed"},
+  {id:"S09", name:"Diana Auma", role:"Trainer", strength:"Formal", languages:["English","Acholi"], homeRegion:"Gulu", note:"New joiner, currently being mentored", formalRate:62, informalRate:45, trips:3, avgOnboard:3.2, status:"Available"},
+  {id:"S10", name:"Ronald Byaruhanga", role:"Account Manager", strength:"Both", languages:["Luganda","English","Runyankole"], homeRegion:"Mbarara", note:"Versatile, covers the western region", formalRate:70, informalRate:72, trips:12, avgOnboard:8.9, status:"Available"},
+];
+
+const PARTNERS = [
+  {id:"P01", name:"Boda Boda Union — Kisenyi", region:"Kampala", sector:"Informal", contact:"Hassan Mugisha", phone:"0772 114 552", officerId:"S04", outreaches:5, attendees:620, onboarded:187, spend:2400000},
+  {id:"P02", name:"Nakasero Market Vendors Assoc.", region:"Kampala", sector:"Informal", contact:"Sarah Nakato", phone:"0781 220 918", officerId:"S01", outreaches:3, attendees:340, onboarded:61, spend:1650000},
+  {id:"P03", name:"St. Mary's Teachers SACCO", region:"Wakiso", sector:"Formal", contact:"Robert Ssebunya", phone:"0700 445 210", officerId:"S06", outreaches:2, attendees:90, onboarded:58, spend:780000},
+  {id:"P04", name:"Mukono District Local Government", region:"Mukono", sector:"Formal", contact:"Immaculate Nabatanzi", phone:"0752 663 401", officerId:"S03", outreaches:2, attendees:150, onboarded:41, spend:1020000},
+  {id:"P05", name:"Jinja Fishing Community Cooperative", region:"Jinja", sector:"Informal", contact:"Wilson Wanyama", phone:"0783 902 774", officerId:"S07", outreaches:3, attendees:210, onboarded:33, spend:1890000},
+  {id:"P06", name:"Gulu Boda Boda & Traders Alliance", region:"Gulu", sector:"Informal", contact:"Christine Aol", phone:"0774 558 330", officerId:"S02", outreaches:1, attendees:95, onboarded:12, spend:1150000},
+];
+
+const initialPipeline = [
+  {id:"L01", name:"Kalerwe Produce Traders Association", region:"Kampala", officerId:"S08", contact:"Fred Musoke", phone:"0701 992 331", stage:"MOU Signed", targetAudience:450, identifiedDate:"2026-06-18"},
+  {id:"L02", name:"Mbarara Taxi Operators Coop", region:"Mbarara", officerId:"S10", contact:"Dennis Tumusiime", phone:"0775 882 119", stage:"Vetted & Contacted", targetAudience:320, identifiedDate:"2026-07-02"},
+  {id:"L03", name:"Mbale Coffee Farmers Federation", region:"Mbale", officerId:"S03", contact:"Patrick Wambede", phone:"0782 334 001", stage:"Identified", targetAudience:600, identifiedDate:"2026-07-14"},
+];
+
+const PIPELINE_STAGES = ["Identified","Vetted & Contacted","MOU Signed"];
+
+const initialOutreaches = [
+  {id:"OUT-013", title:"Extended Roadshow — Kisenyi & Nakawa Stages", partnerId:"P01", region:"Kampala", town:"Kisenyi & Nakawa", sector:"Informal", languages:["Luganda"], date:"2026-07-16", days:2, expectedAudience:140, status:"Approved", assigned:["S08","S04"], perDiemStatus:"Approved", results:null, need:"Two-stage boda roadshow — planned as a 2-day trip"},
+  {id:"OUT-014", title:"Kisenyi Sensitization & Onboarding Drive", partnerId:"P01", region:"Kampala", town:"Kisenyi", sector:"Informal", languages:["Luganda"], date:"2026-07-24", days:1, expectedAudience:180, status:"Pending Approval", assigned:["S01","S08","S04"], perDiemStatus:"Pending Accounting", results:null, need:"Sensitization + onboarding at Saturday union meeting point"},
+  {id:"OUT-015", title:"St. Mary's Teachers Staff Enrollment Session", partnerId:"P03", region:"Wakiso", town:"Kira", sector:"Formal", languages:["English"], date:"2026-07-22", days:1, expectedAudience:60, status:"Approved", assigned:["S06","S02"], perDiemStatus:"Approved", results:null, need:"Onboarding-focused, staffroom presentation after school hours"},
+  {id:"OUT-016", title:"Mukono MDA Sensitization Week", partnerId:"P04", region:"Mukono", town:"Mukono Town", sector:"Formal", languages:["English","Luganda"], date:"2026-07-28", days:3, expectedAudience:220, status:"Draft", assigned:[], perDiemStatus:"Not submitted", results:null, need:"Multi-day district office sensitization ahead of enrollment push"},
+  {id:"OUT-017", title:"Nakasero Market Onboarding Follow-up", partnerId:"P02", region:"Kampala", town:"Nakasero", sector:"Informal", languages:["Luganda"], date:"2026-07-19", days:1, expectedAudience:150, status:"Completed", assigned:["S08","S04","S01"], perDiemStatus:"Disbursed", results:{attendees:138, onboarded:34, spend:620000}, need:"Follow-up onboarding for vendors sensitized in June"},
+  {id:"OUT-018", title:"Lakeside Savings Drive", partnerId:"P05", region:"Jinja", town:"Walukuba", sector:"Informal", languages:["Luganda","Swahili"], date:"2026-08-03", days:2, expectedAudience:130, status:"Pending Approval", assigned:["S07"], perDiemStatus:"Pending Accounting", results:null, need:"Two landing sites, morning sessions before fishers go out"},
+  {id:"OUT-019", title:"Gulu Traders Re-engagement Outreach", partnerId:"P06", region:"Gulu", town:"Gulu Town", sector:"Informal", languages:["Acholi","English"], date:"2026-08-06", days:1, expectedAudience:100, status:"Draft", assigned:[], perDiemStatus:"Not submitted", results:null, need:"Partner underperformed last visit (12/95) — re-engage cautiously"},
+];
+
+const TODAY = new Date("2026-07-21");
+
+/* ============================================================
+   ENGINE — sizing + fit-matching + per diem
+   ============================================================ */
+
+function recommendTeam(expectedAudience){
+  const total = Math.max(2, Math.ceil(expectedAudience / 65));
+  const trainers = Math.max(1, Math.round(total * 0.45));
+  const managers = Math.max(1, total - trainers);
+  return {trainers, managers, total: trainers+managers};
+}
+
+function fitScore(person, outreach){
+  let score = 0;
+  const sectorRate = outreach.sector === "Formal" ? person.formalRate : person.informalRate;
+  score += sectorRate * 0.5;
+  if(outreach.languages.some(l=>person.languages.includes(l))) score += 20;
+  if(person.homeRegion === outreach.region) score += 20; else if(!HARDSHIP_REGIONS.includes(outreach.region)) score += 8;
+  if(person.status === "Available") score += 10;
+  return Math.round(score);
+}
+
+function fitLabel(score){
+  if(score>=80) return {label:"Best match", cls:"badge-best"};
+  if(score>=60) return {label:"Good fit", cls:"badge-good"};
+  return {label:"Consider", cls:"badge-consider"};
+}
+
+function perDiemForPerson(person, outreach){
+  let daily = RATE[person.role];
+  if(HARDSHIP_REGIONS.includes(outreach.region)) daily += 30000;
+  return daily * outreach.days;
+}
+
+function totalPerDiem(outreach, staffList){
+  return outreach.assigned.reduce((sum,id)=>{
+    const p = staffList.find(s=>s.id===id);
+    return p ? sum + perDiemForPerson(p, outreach) : sum;
+  },0);
+}
+
+function daysUntil(dateStr){
+  const d = new Date(dateStr);
+  return Math.round((d - TODAY)/(1000*60*60*24));
+}
+
+function fieldTimeInfo(outreach){
+  const start = new Date(outreach.date);
+  const plannedEnd = new Date(start.getTime() + (outreach.days-1)*86400000);
+  const daysElapsed = Math.floor((TODAY-start)/86400000) + 1;
+  const daysOver = Math.floor((TODAY-plannedEnd)/86400000);
+  const isActive = outreach.status !== "Completed" && TODAY >= start && daysElapsed <= (outreach.days + 10);
+  return {start, plannedEnd, daysElapsed, daysOver, isActive, overstaying: isActive && daysOver > 0};
+}
+
+function getFieldEntries(outreaches, staff){
+  const entries = [];
+  outreaches.forEach(o=>{
+    const info = fieldTimeInfo(o);
+    if(!info.isActive) return;
+    o.assigned.forEach(sid=>{
+      const person = staff.find(s=>s.id===sid);
+      if(person) entries.push({person, outreach:o, ...info});
+    });
+  });
+  return entries;
+}
+
+function fmtUGX(n){
+  return "UGX " + n.toLocaleString("en-US");
+}
+function fmtDate(dateStr){
+  return new Date(dateStr).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"});
+}
+
+function partnerName(outreach, partners){
+  const partner = partners.find(p=>p.id===outreach.partnerId);
+  if(partner) return partner.name;
+  if(outreach.customPartner) return outreach.customPartner;
+  return "Unlisted partner / area";
+}
+
+function getTeamTarget(outreach){
+  const rec = recommendTeam(outreach.expectedAudience);
+  const trainers = (outreach.overrideTrainers!==undefined && outreach.overrideTrainers!==null && outreach.overrideTrainers!=="") ? Number(outreach.overrideTrainers) : rec.trainers;
+  const managers = (outreach.overrideManagers!==undefined && outreach.overrideManagers!==null && outreach.overrideManagers!=="") ? Number(outreach.overrideManagers) : rec.managers;
+  return {trainers, managers, total: trainers+managers, isOverridden: (outreach.overrideTrainers!==undefined && outreach.overrideTrainers!==null && outreach.overrideTrainers!=="") || (outreach.overrideManagers!==undefined && outreach.overrideManagers!==null && outreach.overrideManagers!=="")};
+}
+
+function genOutreachId(outreaches){
+  const nums = outreaches.map(o=>parseInt((o.id.split("-")[1])||"0",10)).filter(n=>!isNaN(n));
+  const max = nums.length ? Math.max(...nums) : 0;
+  return "OUT-"+String(max+1).padStart(3,"0");
+}
+
+const LANGUAGE_OPTIONS = ["Luganda","English","Acholi","Swahili","Runyankole","Luo"];
+
+function statusPill(status){
+  const map = {
+    "Draft":"draft", "Pending Approval":"pending", "Approved":"approved", "Completed":"completed"
+  };
+  return <span className={"pill "+map[status]}><span className="pill-dot"></span>{status}</span>;
+}
+
+function fieldTimeStamp(entry){
+  if(entry.overstaying) return <span className="stamp no">Overstaying · {entry.daysOver}d over plan</span>;
+  if(entry.daysElapsed >= entry.outreach.days) return <span className="stamp wait">On final planned day</span>;
+  return <span className="stamp ok">On track</span>;
+}
+
+function perDiemStamp(pdStatus, urgent){
+  if(pdStatus==="Approved" || pdStatus==="Disbursed")
+    return <span className="stamp ok">{pdStatus==="Disbursed" ? "Disbursed" : "Approved"}</span>;
+  if(pdStatus==="Pending Accounting")
+    return <span className={"stamp "+(urgent?"no":"wait")}>{urgent ? "Unapproved · Urgent" : "Pending"}</span>;
+  return <span className="stamp wait" style={{opacity:0.55}}>Not submitted</span>;
+}
+
+/* ============================================================
+   SHARED BITS
+   ============================================================ */
+
+function Avatar({name}){
+  return <span className="avatar">{initials(name)}</span>;
+}
+
+function KPI({num, lbl, delta, deltaDir}){
+  return (
+    <div className="card kpi">
+      <div className="num">{num}</div>
+      <div className="lbl">{lbl}</div>
+      {delta && <div className={"delta "+(deltaDir==="up"?"up":"down")}>{delta}</div>}
+    </div>
+  );
+}
+
+/* ============================================================
+   DASHBOARD
+   ============================================================ */
+
+function SeniorDashboard({outreaches, staff, partners, goTo}){
+  const pending = outreaches.filter(o=>o.status==="Pending Approval");
+  const urgentPerDiem = outreaches.filter(o=> (o.perDiemStatus==="Pending Accounting") && daysUntil(o.date) <= 3 && daysUntil(o.date) >= 0);
+  const completed = outreaches.filter(o=>o.status==="Completed");
+  const totalOnboardedMonth = completed.reduce((s,o)=>s+(o.results?.onboarded||0),0);
+  const deployedCount = staff.filter(s=>s.status==="Deployed").length;
+  const scoredPartners = partners.filter(p=>p.attendees>0);
+  const worstPartner = scoredPartners.length ? [...scoredPartners].sort((a,b)=>(a.onboarded/a.attendees)-(b.onboarded/b.attendees))[0] : null;
+  const fieldEntries = getFieldEntries(outreaches, staff);
+  const overstaying = fieldEntries.filter(e=>e.overstaying);
+
+  return (
+    <div>
+      <div className="grid cols-4">
+        <KPI num={pending.length} lbl="Outreach plans awaiting approval" />
+        <KPI num={urgentPerDiem.length} lbl="Per diem unapproved, trip < 3 days out" deltaDir="down" delta={urgentPerDiem.length>0 ? "needs Accounting sign-off now" : ""} />
+        <KPI num={overstaying.length} lbl="Staff overstaying in the field vs. plan" deltaDir="down" delta={overstaying.length>0 ? "review before next per diem run" : ""} />
+        <KPI num={staff.length - deployedCount} lbl="Staff available to deploy today" />
+      </div>
+
+      {urgentPerDiem.length>0 &&
+        <div className="callout warn" style={{marginTop:22}}>
+          <strong>{urgentPerDiem.length} trip(s)</strong> depart within 3 days with per diem still <strong>unapproved</strong> — sign off now so staff aren't fronting their own money. See Per Diem tab.
+        </div>
+      }
+      {overstaying.length>0 &&
+        <div className="callout warn">
+          <strong>{overstaying.length} staff member(s)</strong> are still logged in the field beyond the outreach's planned duration. See Per Diem tab → Field Time Tracker.
+        </div>
+      }
+
+      <div className="section-head">
+        <h2>Awaiting your approval</h2>
+        <span className="hint">{pending.length} outreach plan(s)</span>
+      </div>
+      {pending.length===0 ? <div className="empty">Nothing waiting on you right now.</div> :
+      <div className="card" style={{padding:0}}>
+        <table>
+          <thead><tr><th>Outreach</th><th>Region</th><th>Date</th><th>Team</th><th>Per diem</th><th></th></tr></thead>
+          <tbody>
+            {pending.map(o=>{
+              const urgent = o.perDiemStatus==="Pending Accounting" && daysUntil(o.date)<=3 && daysUntil(o.date)>=0;
+              return (
+                <tr key={o.id}>
+                  <td><strong>{o.title}</strong><br/><span className="muted" style={{fontSize:12}}>{partnerName(o, partners)}</span></td>
+                  <td>{o.region}</td>
+                  <td className="mono">{fmtDate(o.date)}</td>
+                  <td>{o.assigned.length} assigned</td>
+                  <td>{perDiemStamp(o.perDiemStatus, urgent)}</td>
+                  <td><button className="btn btn-ghost btn-sm" onClick={()=>goTo("plan", o.id)}>Review →</button></td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>}
+
+      <div className="section-head">
+        <h2>Partner performance flag</h2>
+        <span className="hint">lowest conversion this quarter</span>
+      </div>
+      {worstPartner ? (
+      <div className="card">
+        <div className="row-flex" style={{justifyContent:"space-between"}}>
+          <div>
+            <strong>{worstPartner.name}</strong>
+            <div className="muted" style={{fontSize:12.5, marginTop:3}}>
+              {worstPartner.onboarded} onboarded from {worstPartner.attendees} attendees across {worstPartner.outreaches} outreach(es) — {Math.round(worstPartner.onboarded/worstPartner.attendees*100)}% conversion.
+            </div>
+          </div>
+          <button className="btn btn-ghost btn-sm" onClick={()=>goTo("partners")}>View registry →</button>
+        </div>
+      </div>
+      ) : <div className="empty">No results logged yet.</div>}
+    </div>
+  );
+}
+
+function FieldDashboard({me, outreaches, staff}){
+  if(!me) return <div className="empty">Pick who you are in the left sidebar to see your assignments.</div>;
+  const mine = outreaches.filter(o=>o.assigned.includes(me.id)).sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const upcoming = mine.filter(o=>o.status!=="Completed");
+  const myFieldEntry = getFieldEntries(outreaches, staff).find(e=>e.person.id===me.id);
+
+  const approvedCount = upcoming.filter(o=>o.perDiemStatus==="Approved" || o.perDiemStatus==="Disbursed").length;
+  const pendingCount = upcoming.filter(o=>o.perDiemStatus==="Pending Accounting").length;
+  const urgentCount = upcoming.filter(o=>o.perDiemStatus==="Pending Accounting" && daysUntil(o.date)<=3 && daysUntil(o.date)>=0).length;
+
+  return (
+    <div>
+      <div className="callout">
+        Welcome, {me.name.split(" ")[0]} — {me.role} based in {me.homeRegion}. {me.note}
+      </div>
+
+      <div className="section-head" style={{marginTop:0}}><h2>Your per diem status</h2></div>
+      <div className="perdiem-banner">
+        <div className={"seg "+(approvedCount>0?"ok":"")}>
+          <div className="n">{approvedCount}</div>
+          <div className="l">Approved trip(s)</div>
+        </div>
+        <div className={"seg "+(pendingCount>0?"wait":"")}>
+          <div className="n">{pendingCount}</div>
+          <div className="l">Awaiting Accounting</div>
+        </div>
+        <div className={"seg "+(urgentCount>0?"warn":"")}>
+          <div className="n">{urgentCount}</div>
+          <div className="l">Urgent — trip within 3 days, unapproved</div>
+        </div>
+      </div>
+
+      {myFieldEntry &&
+        <div className={"callout "+(myFieldEntry.overstaying?"warn":"")}>
+          You're currently logged in the field on <strong>{myFieldEntry.outreach.title}</strong> — day {myFieldEntry.daysElapsed} of a planned {myFieldEntry.outreach.days}. {fieldTimeStamp(myFieldEntry)}
+        </div>
+      }
+
+      <div className="section-head"><h2>Your upcoming deployments</h2></div>
+      {upcoming.length===0 ? <div className="empty">No outreach assigned to you right now.</div> :
+      <div className="grid cols-2">
+        {upcoming.map(o=>{
+          const urgent = o.perDiemStatus==="Pending Accounting" && daysUntil(o.date)<=3 && daysUntil(o.date)>=0;
+          return (
+            <div className="card" key={o.id}>
+              <div className="row-flex" style={{justifyContent:"space-between", marginBottom:10}}>
+                {statusPill(o.status)}
+                {perDiemStamp(o.perDiemStatus, urgent)}
+              </div>
+              <strong>{o.title}</strong>
+              <div className="muted" style={{fontSize:12.5, margin:"6px 0 10px"}}>{o.town}, {o.region} · {fmtDate(o.date)} · {o.days} day(s)</div>
+              {urgent && <div style={{fontSize:12, color:"var(--red)", marginTop:8}}>Departs in {daysUntil(o.date)} day(s) — per diem not yet approved by Accounting.</div>}
+            </div>
+          );
+        })}
+      </div>}
+
+      <div className="section-head"><h2>Your activity</h2></div>
+      <div className="grid cols-2">
+        <KPI num={me.trips} lbl="Outreach trips completed" />
+        <div className="card" style={{padding:14}}>
+          <div className="muted" style={{fontSize:11}}>SECTOR STRENGTH</div>
+          <div style={{fontSize:16, fontWeight:600, marginTop:4}}><span className="tag">{me.strength}</span></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   PARTNERS
+   ============================================================ */
+
+function PartnersView({partners, setPartners, pipeline, setPipeline, staff, role}){
+  const [subTab, setSubTab] = useState("active");
+  const [showIdentify, setShowIdentify] = useState(false);
+  const [resultsFor, setResultsFor] = useState(null);
+
+  const officerName = (id) => staff.find(s=>s.id===id)?.name || "Unassigned";
+  const officerObj = (id) => staff.find(s=>s.id===id);
+
+  const ranked = [...partners].sort((a,b)=>(b.onboarded/b.attendees)-(a.onboarded/a.attendees));
+
+  const recordResults = (partnerId, attendeesAdded, onboardedAdded) => {
+    setPartners(prev => prev.map(p => p.id===partnerId ? {
+      ...p,
+      attendees: p.attendees + attendeesAdded,
+      onboarded: p.onboarded + onboardedAdded,
+      outreaches: p.outreaches + 1,
+    } : p));
+    setResultsFor(null);
+  };
+
+  const advanceStage = (leadId) => {
+    setPipeline(prev => prev.map(l=>{
+      if(l.id!==leadId) return l;
+      const idx = PIPELINE_STAGES.indexOf(l.stage);
+      const next = PIPELINE_STAGES[Math.min(idx+1, PIPELINE_STAGES.length-1)];
+      return {...l, stage: next};
+    }));
+  };
+
+  const activateLead = (leadId) => {
+    const lead = pipeline.find(l=>l.id===leadId);
+    if(!lead) return;
+    const newId = "P" + String(partners.length+1).padStart(2,"0") + "-" + leadId;
+    setPartners(prev => [...prev, {
+      id:newId, name:lead.name, region:lead.region, sector:"Informal", contact:lead.contact, phone:lead.phone,
+      officerId:lead.officerId, outreaches:0, attendees:0, onboarded:0, spend:0,
+    }]);
+    setPipeline(prev => prev.filter(l=>l.id!==leadId));
+    setSubTab("active");
+  };
+
+  const identifyPartner = (draft) => {
+    const newId = "L" + String(pipeline.length+1).padStart(2,"0");
+    setPipeline(prev => [...prev, {
+      id:newId, name:draft.name, region:draft.region, officerId:draft.officerId,
+      contact:draft.contact, phone:draft.phone, stage:"Identified",
+      targetAudience:draft.targetAudience, identifiedDate:"2026-07-21",
+    }]);
+    setShowIdentify(false);
+    setSubTab("pipeline");
+  };
+
+  const officerStats = staff.map(s=>{
+    const activePartners = partners.filter(p=>p.officerId===s.id);
+    const pipelineLeads = pipeline.filter(l=>l.officerId===s.id);
+    const outreachesRun = activePartners.reduce((sum,p)=>sum+p.outreaches,0);
+    const totalOnboarded = activePartners.reduce((sum,p)=>sum+p.onboarded,0);
+    return {staff:s, partnersSourced: activePartners.length + pipelineLeads.length, outreachesRun, totalOnboarded};
+  }).filter(o=>o.partnersSourced>0)
+    .sort((a,b)=> b.partnersSourced-a.partnersSourced || b.totalOnboarded-a.totalOnboarded);
+
+  return (
+    <div>
+      <div className="callout">
+        Partner identification drives voluntary savings onboarding — this module tracks active partners, prospective pipeline leads, and officer sourcing effectiveness.
+      </div>
+
+      <div className="row-flex" style={{justifyContent:"space-between", marginBottom:22, flexWrap:"wrap", gap:10}}>
+        <div className="row-flex" style={{gap:8}}>
+          <button className={"btn btn-sm "+(subTab==="active"?"btn-gold":"btn-ghost")} onClick={()=>setSubTab("active")}>Active Registry ({partners.length})</button>
+          <button className={"btn btn-sm "+(subTab==="pipeline"?"btn-gold":"btn-ghost")} onClick={()=>setSubTab("pipeline")}>Sourcing Pipeline ({pipeline.length})</button>
+          <button className={"btn btn-sm "+(subTab==="officers"?"btn-gold":"btn-ghost")} onClick={()=>setSubTab("officers")}>Officer Sourcing</button>
+        </div>
+        {role==="senior" && <button className="btn btn-primary" onClick={()=>setShowIdentify(true)}>+ Identify New Partner</button>}
+      </div>
+
+      {subTab==="active" && (
+        <>
+          <div className="section-head" style={{marginTop:0}}>
+            <h2>Active Partner Registry</h2>
+            <span className="hint">ranked by onboarding conversion rate</span>
+          </div>
+          <div className="card" style={{padding:0}}>
+            <table>
+              <thead><tr><th style={{width:28}}>#</th><th>Partner</th><th>Region</th><th>Sector</th><th>Identifying Officer</th><th>Attendees</th><th>Onboarded</th><th>Conversion</th>{role==="senior" && <th></th>}</tr></thead>
+              <tbody>
+                {ranked.map((p,i)=>{
+                  const conv = p.attendees>0 ? Math.round(p.onboarded/p.attendees*100) : 0;
+                  const low = conv < 25;
+                  return (
+                    <tr key={p.id}>
+                      <td className="ledger-idx">{String(i+1).padStart(2,"0")}</td>
+                      <td><strong>{p.name}</strong><div className="muted" style={{fontSize:11.5}}>{p.outreaches} outreach(es) completed</div></td>
+                      <td>{p.region}</td>
+                      <td><span className="tag">{p.sector}</span></td>
+                      <td className="muted" style={{fontSize:12.5}}>{officerName(p.officerId)}</td>
+                      <td className="mono">{p.attendees}</td>
+                      <td className="mono">{p.onboarded}</td>
+                      <td>
+                        {p.attendees>0
+                          ? <span className={"pill "+(low?"urgent":"approved")}><span className="pill-dot"></span>{conv}%</span>
+                          : <span className="pill draft"><span className="pill-dot"></span>No data yet</span>}
+                      </td>
+                      {role==="senior" && <td><button className="btn btn-ghost btn-sm" onClick={()=>setResultsFor(p.id)}>Record results</button></td>}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+
+      {subTab==="pipeline" && (
+        <>
+          <div className="section-head" style={{marginTop:0}}>
+            <h2>Partner Sourcing Pipeline</h2>
+            <span className="hint">un-outreached partner prospects</span>
+          </div>
+          {pipeline.length===0 ? <div className="empty">No leads in the pipeline right now.</div> :
+          <div className="card" style={{padding:0}}>
+            <table>
+              <thead><tr><th style={{width:28}}>#</th><th>Partner Lead</th><th>Region</th><th>Identifying Officer</th><th>Pipeline Stage</th><th>Target Audience</th><th>Identified Date</th>{role==="senior" && <th></th>}</tr></thead>
+              <tbody>
+                {pipeline.map((l,i)=>(
+                  <tr key={l.id}>
+                    <td className="ledger-idx">{String(i+1).padStart(2,"0")}</td>
+                    <td><strong>{l.name}</strong><div className="muted" style={{fontSize:11.5}}>{l.contact} · {l.phone}</div></td>
+                    <td>{l.region}</td>
+                    <td className="muted" style={{fontSize:12.5}}>{officerName(l.officerId)}</td>
+                    <td><span className="pill pending"><span className="pill-dot"></span>{l.stage}</span></td>
+                    <td className="mono">{l.targetAudience}</td>
+                    <td className="mono">{fmtDate(l.identifiedDate)}</td>
+                    {role==="senior" && (
+                      <td>
+                        {l.stage!=="MOU Signed"
+                          ? <button className="btn btn-ghost btn-sm" onClick={()=>advanceStage(l.id)}>Advance →</button>
+                          : <button className="btn btn-gold btn-sm" onClick={()=>activateLead(l.id)}>Activate as Partner</button>}
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>}
+        </>
+      )}
+
+      {subTab==="officers" && (
+        <>
+          <div className="section-head" style={{marginTop:0}}>
+            <h2>Officer Partner Identification Leaderboard</h2>
+            <span className="hint">measured on partners identified &amp; onboarding outcomes</span>
+          </div>
+          {officerStats.length===0 ? <div className="empty">No partners have been attributed to an officer yet.</div> :
+          <div className="card" style={{padding:0}}>
+            <table>
+              <thead><tr><th style={{width:28}}>#</th><th>Officer</th><th>Role</th><th>Partners Sourced</th><th>Outreaches Run</th><th>Total Members Onboarded</th></tr></thead>
+              <tbody>
+                {officerStats.map((o,i)=>(
+                  <tr key={o.staff.id}>
+                    <td className="ledger-idx">{String(i+1).padStart(2,"0")}</td>
+                    <td><div className="row-flex"><Avatar name={o.staff.name}/> <strong>{o.staff.name}</strong></div></td>
+                    <td><span className="tag">{o.staff.role}</span></td>
+                    <td className="mono">{o.partnersSourced} partner(s)</td>
+                    <td className="mono">{o.outreachesRun}</td>
+                    <td className="mono" style={{color:"var(--forest-3)", fontWeight:600}}>{o.totalOnboarded} members</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>}
+        </>
+      )}
+
+      {showIdentify && (
+        <IdentifyPartnerModal staff={staff} onClose={()=>setShowIdentify(false)} onCreate={identifyPartner}/>
+      )}
+      {resultsFor && (
+        <RecordResultsModal
+          partner={partners.find(p=>p.id===resultsFor)}
+          onClose={()=>setResultsFor(null)}
+          onSave={(att,ob)=>recordResults(resultsFor, att, ob)}
+        />
+      )}
+    </div>
+  );
+}
+
+function IdentifyPartnerModal({staff, onClose, onCreate}){
+  const [name, setName] = useState("");
+  const [region, setRegion] = useState(REGIONS[0]);
+  const [customRegion, setCustomRegion] = useState("");
+  const [contact, setContact] = useState("");
+  const [phone, setPhone] = useState("");
+  const [officerId, setOfficerId] = useState(staff[0]?.id || "");
+  const [targetAudience, setTargetAudience] = useState(100);
+
+  const resolvedRegion = region==="Other" ? customRegion.trim() : region;
+  const canSubmit = name.trim() && contact.trim() && officerId && resolvedRegion;
+
+  return (
+    <div className="modal-back" onClick={(e)=>{if(e.target===e.currentTarget) onClose();}}>
+      <div className="modal">
+        <div className="modal-head">
+          <div>
+            <h3 style={{margin:"0 0 4px"}}>Identify a new partner</h3>
+            <div className="muted" style={{fontSize:12.5}}>Logs a fresh lead into the Sourcing Pipeline — it becomes an Active Partner once it's been outreached.</div>
+          </div>
+          <button className="x-close" onClick={onClose}>×</button>
+        </div>
+        <div className="field">
+          <label>Partner / lead name</label>
+          <input value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. Owino Market Traders Association" />
+        </div>
+        <div className="grid cols-2">
+          <div className="field">
+            <label>Region</label>
+            <select value={region} onChange={e=>setRegion(e.target.value)}>
+              {REGIONS.map(r=><option key={r}>{r}</option>)}
+              <option value="Other">Other (type below)</option>
+            </select>
+            {region==="Other" && (
+              <div className="other-field">
+                <input value={customRegion} onChange={e=>setCustomRegion(e.target.value)} placeholder="Enter the region name" />
+              </div>
+            )}
+          </div>
+          <div className="field">
+            <label>Target audience (est.)</label>
+            <input type="number" min="1" value={targetAudience} onChange={e=>setTargetAudience(Number(e.target.value)||0)} />
+          </div>
+        </div>
+        <div className="grid cols-2">
+          <div className="field">
+            <label>Contact person</label>
+            <input value={contact} onChange={e=>setContact(e.target.value)} placeholder="Full name" />
+          </div>
+          <div className="field">
+            <label>Contact phone</label>
+            <input value={phone} onChange={e=>setPhone(e.target.value)} placeholder="07XX XXX XXX" />
+          </div>
+        </div>
+        <div className="field">
+          <label>Identifying officer</label>
+          <select value={officerId} onChange={e=>setOfficerId(e.target.value)}>
+            {staff.map(s=><option key={s.id} value={s.id}>{s.name} — {s.role}</option>)}
+          </select>
+        </div>
+        <div className="divider"></div>
+        <div className="row-flex" style={{justifyContent:"flex-end", gap:10}}>
+          <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
+          <button className="btn btn-primary" disabled={!canSubmit} onClick={()=>onCreate({name:name.trim(), region:resolvedRegion, contact:contact.trim(), phone:phone.trim(), officerId, targetAudience})}>Add to pipeline</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RecordResultsModal({partner, onClose, onSave}){
+  const [attendees, setAttendees] = useState("");
+  const [onboarded, setOnboarded] = useState("");
+  const canSubmit = attendees!=="" && onboarded!=="" && Number(onboarded)<=Number(attendees);
+
+  return (
+    <div className="modal-back" onClick={(e)=>{if(e.target===e.currentTarget) onClose();}}>
+      <div className="modal">
+        <div className="modal-head">
+          <div>
+            <h3 style={{margin:"0 0 4px"}}>Record outreach results</h3>
+            <div className="muted" style={{fontSize:12.5}}>{partner?.name} — this adds to their running total and updates conversion automatically.</div>
+          </div>
+          <button className="x-close" onClick={onClose}>×</button>
+        </div>
+        <div className="grid cols-2">
+          <div className="field">
+            <label>Attendees at this outreach</label>
+            <input type="number" min="0" value={attendees} onChange={e=>setAttendees(e.target.value)} />
+          </div>
+          <div className="field">
+            <label>Members onboarded</label>
+            <input type="number" min="0" value={onboarded} onChange={e=>setOnboarded(e.target.value)} />
+          </div>
+        </div>
+        {Number(onboarded) > Number(attendees) && attendees!=="" &&
+          <div className="callout warn">Onboarded can't exceed attendees.</div>}
+        <div className="divider"></div>
+        <div className="row-flex" style={{justifyContent:"flex-end", gap:10}}>
+          <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
+          <button className="btn btn-primary" disabled={!canSubmit} onClick={()=>onSave(Number(attendees), Number(onboarded))}>Save results</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   PLAN OUTREACH (sizing + fit-matching engine)
+   ============================================================ */
+
+function PlanOutreach({outreaches, setOutreaches, staff, partners, role, openId, setOpenId}){
+  const [showCreate, setShowCreate] = useState(false);
+  const open = outreaches.find(o=>o.id===openId) || null;
+
+  const toggleAssign = (outreachId, staffId) => {
+    setOutreaches(prev => prev.map(o=>{
+      if(o.id!==outreachId) return o;
+      const has = o.assigned.includes(staffId);
+      return {...o, assigned: has ? o.assigned.filter(x=>x!==staffId) : [...o.assigned, staffId]};
+    }));
+  };
+
+  const submitForApproval = (id) => {
+    setOutreaches(prev => prev.map(o => o.id===id ? {...o, status:"Pending Approval", perDiemStatus: o.perDiemStatus==="Not submitted" ? "Pending Accounting" : o.perDiemStatus} : o));
+  };
+  const approve = (id) => {
+    setOutreaches(prev => prev.map(o => o.id===id ? {...o, status:"Approved"} : o));
+  };
+  const approvePerDiem = (id) => {
+    setOutreaches(prev => prev.map(o => o.id===id ? {...o, perDiemStatus:"Approved"} : o));
+  };
+
+  const createOutreach = (draft) => {
+    const id = genOutreachId(outreaches);
+    const newOutreach = {
+      id,
+      title: draft.title,
+      partnerId: draft.partnerMode==="existing" ? draft.partnerId : null,
+      customPartner: draft.partnerMode==="new" ? draft.customPartnerName : null,
+      region: draft.region,
+      town: draft.town,
+      sector: draft.sector,
+      languages: draft.languages,
+      date: draft.date,
+      days: draft.days,
+      expectedAudience: draft.expectedAudience,
+      status: "Draft",
+      assigned: [],
+      perDiemStatus: "Not submitted",
+      results: null,
+      need: draft.need,
+      overrideTrainers: draft.trainersOverride,
+      overrideManagers: draft.managersOverride,
+    };
+    setOutreaches(prev => [...prev, newOutreach]);
+    setShowCreate(false);
+    setOpenId(id);
+  };
+
+  return (
+    <div>
+      <div className="section-head">
+        <h2>Outreach register</h2>
+        <div className="row-flex">
+          <span className="hint">{outreaches.length} logged</span>
+          {role==="senior" && <button className="btn btn-primary btn-sm" onClick={()=>setShowCreate(true)}>+ New outreach</button>}
+        </div>
+      </div>
+      <div className="card" style={{padding:0}}>
+        <table>
+          <thead><tr><th style={{width:28}}>#</th><th>Outreach</th><th>Region</th><th>Date</th><th>Audience</th><th>Team</th><th>Status</th><th>Per diem</th><th></th></tr></thead>
+          <tbody>
+            {outreaches.map((o,i)=>{
+              const target = getTeamTarget(o);
+              const urgent = o.perDiemStatus==="Pending Accounting" && daysUntil(o.date)<=3 && daysUntil(o.date)>=0;
+              return (
+                <tr key={o.id}>
+                  <td className="ledger-idx">{String(i+1).padStart(2,"0")}</td>
+                  <td><strong>{o.title}</strong><div className="muted" style={{fontSize:11.5}}>{partnerName(o, partners)} · {o.town}</div></td>
+                  <td>{o.region}</td>
+                  <td className="mono">{fmtDate(o.date)}</td>
+                  <td className="mono">{o.expectedAudience}</td>
+                  <td>{o.assigned.length}/{target.total}</td>
+                  <td>{statusPill(o.status)}</td>
+                  <td>{perDiemStamp(o.perDiemStatus, urgent)}</td>
+                  <td><button className="btn btn-ghost btn-sm" onClick={()=>setOpenId(o.id)}>Open →</button></td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {showCreate && (
+        <CreateOutreachModal
+          partners={partners}
+          onClose={()=>setShowCreate(false)}
+          onCreate={createOutreach}
+        />
+      )}
+
+      {open && (
+        <OutreachDetail
+          outreach={open}
+          partnerLabel={partnerName(open, partners)}
+          staff={staff}
+          role={role}
+          onClose={()=>setOpenId(null)}
+          onToggleAssign={(sid)=>toggleAssign(open.id, sid)}
+          onSubmit={()=>submitForApproval(open.id)}
+          onApprove={()=>approve(open.id)}
+          onApprovePerDiem={()=>approvePerDiem(open.id)}
+        />
+      )}
+    </div>
+  );
+}
+
+function CreateOutreachModal({partners, onClose, onCreate}){
+  const [partnerMode, setPartnerMode] = useState("existing");
+  const [partnerId, setPartnerId] = useState(partners[0]?.id || "");
+  const [customPartnerName, setCustomPartnerName] = useState("");
+  const [title, setTitle] = useState("");
+  const [region, setRegion] = useState(REGIONS[0]);
+  const [customRegion, setCustomRegion] = useState("");
+  const [town, setTown] = useState("");
+  const [sector, setSector] = useState("Informal");
+  const [languages, setLanguages] = useState(["Luganda"]);
+  const [showOtherLang, setShowOtherLang] = useState(false);
+  const [customLanguage, setCustomLanguage] = useState("");
+  const [date, setDate] = useState("");
+  const [days, setDays] = useState(1);
+  const [expectedAudience, setExpectedAudience] = useState(100);
+  const [trainersOverride, setTrainersOverride] = useState("");
+  const [managersOverride, setManagersOverride] = useState("");
+  const [need, setNeed] = useState("");
+
+  const rec = recommendTeam(Number(expectedAudience)||0);
+  const toggleLang = (l) => setLanguages(prev => prev.includes(l) ? prev.filter(x=>x!==l) : [...prev, l]);
+  const addCustomLanguage = () => {
+    const val = customLanguage.trim();
+    if(val && !languages.includes(val)) setLanguages(prev => [...prev, val]);
+    setCustomLanguage("");
+    setShowOtherLang(false);
+  };
+
+  const resolvedRegion = region==="Other" ? customRegion.trim() : region;
+  const canSubmit = title.trim() && date && Number(expectedAudience) > 0 && (partnerMode==="existing" ? partnerId : customPartnerName.trim()) && town.trim() && resolvedRegion;
+
+  const handleSubmit = () => {
+    if(!canSubmit) return;
+    onCreate({
+      title: title.trim(),
+      partnerMode, partnerId, customPartnerName: customPartnerName.trim(),
+      region: resolvedRegion, town: town.trim(), sector, languages,
+      date, days: Number(days)||1, expectedAudience: Number(expectedAudience)||0,
+      trainersOverride: trainersOverride!=="" ? Number(trainersOverride) : undefined,
+      managersOverride: managersOverride!=="" ? Number(managersOverride) : undefined,
+      need: need.trim(),
+    });
+  };
+
+  return (
+    <div className="modal-back" onClick={(e)=>{if(e.target===e.currentTarget) onClose();}}>
+      <div className="modal">
+        <div className="modal-head">
+          <div>
+            <h3 style={{margin:"0 0 4px"}}>Plan a new outreach</h3>
+            <div className="muted" style={{fontSize:12.5}}>Log the who/where/when — the tool will size the team and suggest a fit-matched roster.</div>
+          </div>
+          <button className="x-close" onClick={onClose}>×</button>
+        </div>
+
+        <div className="field">
+          <label>Outreach title</label>
+          <input value={title} onChange={e=>setTitle(e.target.value)} placeholder="e.g. Kalerwe Market Sensitization & Onboarding" />
+        </div>
+
+        <div className="field">
+          <label>Partner or area</label>
+          <div className="chip-select" style={{marginBottom:10}}>
+            <span className={"chip "+(partnerMode==="existing"?"on":"")} onClick={()=>setPartnerMode("existing")}>Existing partner</span>
+            <span className={"chip "+(partnerMode==="new"?"on":"")} onClick={()=>setPartnerMode("new")}>New / unlisted partner</span>
+          </div>
+          {partnerMode==="existing" ? (
+            <select value={partnerId} onChange={e=>setPartnerId(e.target.value)}>
+              {partners.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
+          ) : (
+            <input value={customPartnerName} onChange={e=>setCustomPartnerName(e.target.value)} placeholder="Name of the partner, market, union, or area" />
+          )}
+        </div>
+
+        <div className="grid cols-2">
+          <div className="field">
+            <label>Region</label>
+            <select value={region} onChange={e=>setRegion(e.target.value)}>
+              {REGIONS.map(r=><option key={r}>{r}</option>)}
+              <option value="Other">Other (type below)</option>
+            </select>
+            {region==="Other" && (
+              <div className="other-field">
+                <input value={customRegion} onChange={e=>setCustomRegion(e.target.value)} placeholder="Enter the region name" />
+              </div>
+            )}
+          </div>
+          <div className="field">
+            <label>Town / specific site</label>
+            <input value={town} onChange={e=>setTown(e.target.value)} placeholder="e.g. Kalerwe" />
+          </div>
+        </div>
+
+        <div className="field">
+          <label>Sector</label>
+          <div className="chip-select">
+            <span className={"chip "+(sector==="Informal"?"on":"")} onClick={()=>setSector("Informal")}>Informal</span>
+            <span className={"chip "+(sector==="Formal"?"on":"")} onClick={()=>setSector("Formal")}>Formal</span>
+          </div>
+        </div>
+
+        <div className="field">
+          <label>Language(s) needed</label>
+          <div className="chip-select">
+            {LANGUAGE_OPTIONS.map(l=>(
+              <span key={l} className={"chip "+(languages.includes(l)?"on":"")} onClick={()=>toggleLang(l)}>{l}</span>
+            ))}
+            {languages.filter(l=>!LANGUAGE_OPTIONS.includes(l)).map(l=>(
+              <span key={l} className="chip on" onClick={()=>toggleLang(l)}>{l}</span>
+            ))}
+            <span className={"chip "+(showOtherLang?"on":"")} onClick={()=>setShowOtherLang(v=>!v)}>+ Other</span>
+          </div>
+          {showOtherLang && (
+            <div className="other-field row-flex" style={{gap:8}}>
+              <input value={customLanguage} onChange={e=>setCustomLanguage(e.target.value)} placeholder="Type a language" onKeyDown={e=>e.key==="Enter" && addCustomLanguage()} />
+              <button type="button" className="btn btn-ghost btn-sm" onClick={addCustomLanguage}>Add</button>
+            </div>
+          )}
+        </div>
+
+        <div className="grid cols-3">
+          <div className="field">
+            <label>Start date</label>
+            <input type="date" value={date} onChange={e=>setDate(e.target.value)} />
+          </div>
+          <div className="field">
+            <label>Duration (days)</label>
+            <input type="number" min="1" value={days} onChange={e=>setDays(e.target.value)} />
+          </div>
+          <div className="field">
+            <label>Expected participants</label>
+            <input type="number" min="1" value={expectedAudience} onChange={e=>setExpectedAudience(e.target.value)} />
+          </div>
+        </div>
+
+        <div className="callout" style={{marginTop:2}}>
+          Based on {expectedAudience || 0} expected participants, the tool recommends <strong>{rec.trainers} Trainer{rec.trainers>1?"s":""} + {rec.managers} Account Manager{rec.managers>1?"s":""}</strong>. Adjust below only if you know something the numbers don't — e.g. a difficult site, a first-time partner, or a known low-conversion history.
+        </div>
+
+        <div className="grid cols-2">
+          <div className="field">
+            <label>Trainers to send (override)</label>
+            <input type="number" min="0" value={trainersOverride} onChange={e=>setTrainersOverride(e.target.value)} placeholder={String(rec.trainers)+" (recommended)"} />
+          </div>
+          <div className="field">
+            <label>Account Managers to send (override)</label>
+            <input type="number" min="0" value={managersOverride} onChange={e=>setManagersOverride(e.target.value)} placeholder={String(rec.managers)+" (recommended)"} />
+          </div>
+        </div>
+
+        <div className="field">
+          <label>Other factors to consider</label>
+          <textarea rows="3" value={need} onChange={e=>setNeed(e.target.value)} placeholder="e.g. partner has underperformed before, site needs early-morning start, security concerns, materials required, VIP attendance expected..." />
+        </div>
+
+        <div className="divider"></div>
+        <div className="row-flex" style={{justifyContent:"flex-end", gap:10}}>
+          <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
+          <button className="btn btn-primary" disabled={!canSubmit} onClick={handleSubmit}>Create outreach</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function OutreachDetail({outreach, partnerLabel, staff, role, onClose, onToggleAssign, onSubmit, onApprove, onApprovePerDiem}){
+  const rec = getTeamTarget(outreach);
+  const assignedStaff = outreach.assigned.map(id=>staff.find(s=>s.id===id)).filter(Boolean);
+  const assignedTrainers = assignedStaff.filter(s=>s.role==="Trainer").length;
+  const assignedManagers = assignedStaff.filter(s=>s.role==="Account Manager").length;
+
+  const candidates = staff
+    .map(s=>({...s, score: fitScore(s, outreach)}))
+    .sort((a,b)=>b.score-a.score);
+  const trainerCandidates = candidates.filter(s=>s.role==="Trainer");
+  const managerCandidates = candidates.filter(s=>s.role==="Account Manager");
+
+  const overStaffed = assignedStaff.length > rec.total;
+  const understaffed = assignedStaff.length < rec.total;
+
+  return (
+    <div className="modal-back" onClick={(e)=>{if(e.target===e.currentTarget) onClose();}}>
+      <div className="modal">
+        <div className="modal-head">
+          <div>
+            <h3 style={{margin:"0 0 4px"}}>{outreach.title}</h3>
+            <div className="muted" style={{fontSize:12.5}}>{partnerLabel} · {outreach.town}, {outreach.region} · {fmtDate(outreach.date)} · {outreach.days} day(s)</div>
+          </div>
+          <button className="x-close" onClick={onClose}>×</button>
+        </div>
+
+        {outreach.need && <div className="callout" style={{marginBottom:16}}>{outreach.need}</div>}
+
+        <div className="grid cols-3" style={{marginBottom:18}}>
+          <div className="card" style={{padding:14}}>
+            <div className="muted" style={{fontSize:11}}>EXPECTED AUDIENCE</div>
+            <div className="mono" style={{fontSize:18, fontWeight:600}}>{outreach.expectedAudience}</div>
+          </div>
+          <div className="card" style={{padding:14}}>
+            <div className="muted" style={{fontSize:11}}>{rec.isOverridden ? "TEAM (MANAGER-SET)" : "RECOMMENDED TEAM"}</div>
+            <div style={{fontSize:14, fontWeight:600, marginTop:2}}>{rec.trainers} Trainer{rec.trainers!==1?"s":""} + {rec.managers} Acct. Mgr{rec.managers!==1?"s":""}</div>
+          </div>
+          <div className="card" style={{padding:14}}>
+            <div className="muted" style={{fontSize:11}}>ASSIGNED SO FAR</div>
+            <div style={{fontSize:14, fontWeight:600, marginTop:2, color: overStaffed?"var(--red)":understaffed?"var(--gold-deep)":"var(--forest-3)"}}>
+              {assignedTrainers} Trainer{assignedTrainers!==1?"s":""} + {assignedManagers} Mgr{assignedManagers!==1?"s":""}
+              {overStaffed && " — over-staffed"}
+              {understaffed && " — below recommendation"}
+            </div>
+          </div>
+        </div>
+
+        <div className="section-head" style={{margin:"18px 0 8px"}}>
+          <h2 style={{fontSize:15}}>Best-fit Trainers</h2>
+        </div>
+        {trainerCandidates.slice(0,4).map(s=>{
+          const on = outreach.assigned.includes(s.id);
+          const lbl = fitLabel(s.score);
+          return (
+            <div className="match-row" key={s.id}>
+              <Avatar name={s.name}/>
+              <div style={{flex:1}}>
+                <div className="row-flex" style={{gap:8}}>
+                  <strong style={{fontSize:13.5}}>{s.name}</strong>
+                  <span className={lbl.cls}>{lbl.label}</span>
+                  {s.status==="Deployed" && <span className="tag" style={{background:"var(--red-soft)", color:"var(--red)", borderColor:"transparent"}}>Deployed elsewhere</span>}
+                </div>
+                <div className="muted" style={{fontSize:11.5, margin:"3px 0 6px"}}>{s.homeRegion} · {s.languages.join(", ")} · {s.note}</div>
+                <div className="fit-bar"><div style={{width:s.score+"%"}}></div></div>
+              </div>
+              <button className={"btn btn-sm "+(on?"btn-danger":"btn-ghost")} disabled={role!=="senior"} onClick={()=>onToggleAssign(s.id)}>{on?"Remove":"Assign"}</button>
+            </div>
+          );
+        })}
+
+        <div className="section-head" style={{margin:"22px 0 8px"}}>
+          <h2 style={{fontSize:15}}>Best-fit Account Managers</h2>
+        </div>
+        {managerCandidates.slice(0,4).map(s=>{
+          const on = outreach.assigned.includes(s.id);
+          const lbl = fitLabel(s.score);
+          return (
+            <div className="match-row" key={s.id}>
+              <Avatar name={s.name}/>
+              <div style={{flex:1}}>
+                <div className="row-flex" style={{gap:8}}>
+                  <strong style={{fontSize:13.5}}>{s.name}</strong>
+                  <span className={lbl.cls}>{lbl.label}</span>
+                  {s.status==="Deployed" && <span className="tag" style={{background:"var(--red-soft)", color:"var(--red)", borderColor:"transparent"}}>Deployed elsewhere</span>}
+                </div>
+                <div className="muted" style={{fontSize:11.5, margin:"3px 0 6px"}}>{s.homeRegion} · {s.languages.join(", ")} · {s.note}</div>
+                <div className="fit-bar"><div style={{width:s.score+"%"}}></div></div>
+              </div>
+              <button className={"btn btn-sm "+(on?"btn-danger":"btn-ghost")} disabled={role!=="senior"} onClick={()=>onToggleAssign(s.id)}>{on?"Remove":"Assign"}</button>
+            </div>
+          );
+        })}
+
+        <div className="divider"></div>
+        <div className="row-flex" style={{justifyContent:"space-between"}}>
+          <div>
+            <div className="muted" style={{fontSize:11, marginBottom:6}}>PER DIEM STATUS</div>
+            {perDiemStamp(outreach.perDiemStatus, false)}
+          </div>
+          <div className="row-flex">
+            {role==="senior" && outreach.status==="Draft" &&
+              <button className="btn btn-primary" onClick={()=>{onSubmit(); onClose();}}>Submit for approval</button>}
+            {role==="senior" && outreach.status==="Pending Approval" &&
+              <button className="btn btn-gold" onClick={()=>{onApprove(); onClose();}}>Approve outreach plan</button>}
+            {role==="senior" && outreach.perDiemStatus==="Pending Accounting" &&
+              <button className="btn btn-primary" onClick={onApprovePerDiem}>Approve per diem</button>}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   SCHEDULE
+   ============================================================ */
+
+function ScheduleView({outreaches, staff, partners}){
+  const [filterRegion, setFilterRegion] = useState("All");
+  const sorted = [...outreaches].sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const filtered = filterRegion==="All" ? sorted : sorted.filter(o=>o.region===filterRegion);
+
+  return (
+    <div>
+      <div className="section-head">
+        <h2>Deployment schedule</h2>
+        <select style={{width:180}} value={filterRegion} onChange={e=>setFilterRegion(e.target.value)}>
+          <option>All</option>
+          {REGIONS.map(r=><option key={r}>{r}</option>)}
+        </select>
+      </div>
+      {filtered.map(o=>{
+        const assignedStaff = o.assigned.map(id=>staff.find(s=>s.id===id)).filter(Boolean);
+        return (
+          <div className="card" key={o.id} style={{marginBottom:14}}>
+            <div className="row-flex" style={{justifyContent:"space-between", marginBottom:10}}>
+              <div>
+                <strong>{o.title}</strong>
+                <div className="muted" style={{fontSize:12}}>{partnerName(o, partners)} · {o.town}, {o.region}</div>
+              </div>
+              <div style={{textAlign:"right"}}>
+                <div className="mono" style={{fontSize:13}}>{fmtDate(o.date)} · {o.days}d</div>
+                {statusPill(o.status)}
+              </div>
+            </div>
+            <div className="row-flex" style={{flexWrap:"wrap", gap:8}}>
+              {assignedStaff.length===0 && <span className="muted" style={{fontSize:12.5}}>No one assigned yet</span>}
+              {assignedStaff.map(s=>(
+                <span className="tag" key={s.id} style={{display:"flex", alignItems:"center", gap:6, padding:"5px 10px"}}>
+                  <Avatar name={s.name}/> {s.name} <span className="muted">· {s.role}</span>
+                </span>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ============================================================
+   PER DIEM
+   ============================================================ */
+
+function PerDiemView({outreaches, setOutreaches, staff, partners, role}){
+  const approvePerDiem = (id) => setOutreaches(prev => prev.map(o => o.id===id ? {...o, perDiemStatus:"Approved"} : o));
+  const queue = outreaches.filter(o=>o.perDiemStatus!=="Not submitted");
+  const fieldEntries = getFieldEntries(outreaches, staff);
+
+  return (
+    <div>
+      <div className="callout">
+        Per diem is triggered the moment a team is assigned to an outreach, so Accounting can review and approve it before departure instead of after — no figures shown here, just whether it's been signed off.
+      </div>
+      <div className="section-head">
+        <h2>Approval queue</h2>
+      </div>
+      <div className="card" style={{padding:0}}>
+        <table>
+          <thead><tr><th>Outreach</th><th>Departs</th><th>Assigned</th><th>Status</th>{role==="senior" && <th></th>}</tr></thead>
+          <tbody>
+            {queue.map(o=>{
+              const urgent = o.perDiemStatus==="Pending Accounting" && daysUntil(o.date)<=3 && daysUntil(o.date)>=0;
+              return (
+                <tr key={o.id}>
+                  <td><strong>{o.title}</strong><div className="muted" style={{fontSize:11.5}}>{partnerName(o, partners)}</div></td>
+                  <td className="mono">{fmtDate(o.date)}{urgent && <div style={{color:"var(--red)", fontSize:11}}>in {daysUntil(o.date)}d</div>}</td>
+                  <td>{o.assigned.length} staff</td>
+                  <td>{perDiemStamp(o.perDiemStatus, urgent)}</td>
+                  {role==="senior" && <td>{o.perDiemStatus==="Pending Accounting" &&
+                    <button className="btn btn-primary btn-sm" onClick={()=>approvePerDiem(o.id)}>Approve</button>}</td>}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="section-head">
+        <h2>Field time tracker</h2>
+        <span className="hint">flags staff still in the field beyond the planned duration</span>
+      </div>
+      <div className="callout">
+        This isn't about accusing anyone — it exists so a trip that quietly runs long, without matching registrations to show for it, gets caught before the next per diem cycle rather than after.
+      </div>
+      {fieldEntries.length===0 ? <div className="empty">No one is currently logged as in the field.</div> :
+      <div className="card" style={{padding:0}}>
+        <table>
+          <thead><tr><th>Staff</th><th>Role</th><th>Outreach</th><th>Planned</th><th>Day of trip</th><th>Status</th></tr></thead>
+          <tbody>
+            {fieldEntries.map((e,i)=>(
+              <tr key={i}>
+                <td><div className="row-flex"><Avatar name={e.person.name}/> <strong>{e.person.name}</strong></div></td>
+                <td>{e.person.role}</td>
+                <td>{e.outreach.title}</td>
+                <td className="mono">{e.outreach.days} day(s)</td>
+                <td className="mono">Day {e.daysElapsed}</td>
+                <td>{fieldTimeStamp(e)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>}
+    </div>
+  );
+}
+
+/* ============================================================
+   RESULTS & INSIGHTS
+   ============================================================ */
+
+function ResultsView({outreaches, partners, staff}){
+  const completed = outreaches.filter(o=>o.status==="Completed" && o.results);
+  const totalOnboarded = completed.reduce((s,o)=>s+o.results.onboarded,0);
+  const totalAttendees = completed.reduce((s,o)=>s+o.results.attendees,0);
+
+  return (
+    <div>
+      <div className="grid cols-2">
+        <KPI num={totalOnboarded} lbl="Members onboarded (completed outreaches)" />
+        <KPI num={totalAttendees? Math.round(totalOnboarded/totalAttendees*100)+"%" : "—"} lbl="Attendee → onboarding conversion" />
+      </div>
+
+      <div className="section-head"><h2>Completed outreach results</h2></div>
+      {completed.length===0 ? <div className="empty">No completed outreach logged yet.</div> :
+      <div className="card" style={{padding:0}}>
+        <table>
+          <thead><tr><th>Outreach</th><th>Date</th><th>Attendees</th><th>Onboarded</th><th>Conversion</th></tr></thead>
+          <tbody>
+            {completed.map(o=>(
+              <tr key={o.id}>
+                <td><strong>{o.title}</strong></td>
+                <td className="mono">{fmtDate(o.date)}</td>
+                <td className="mono">{o.results.attendees}</td>
+                <td className="mono">{o.results.onboarded}</td>
+                <td>{Math.round(o.results.onboarded/o.results.attendees*100)}%</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>}
+    </div>
+  );
+}
+
+/* ============================================================
+   MANAGE USERS
+   ============================================================ */
+
+function ManageUsersView({staff, seniorManagers, onAddStaff, onAddSeniorManager}){
+  const [showAdd, setShowAdd] = useState(false);
+
+  const rows = [
+    ...seniorManagers.map(m=>({id:m.id, name:m.name, accountType:"Senior Manager", detail:m.title})),
+    ...staff.map(s=>({id:s.id, name:s.name, accountType:"Field Staff", detail:s.role+" · "+s.homeRegion})),
+  ];
+
+  return (
+    <div>
+      <div className="callout">
+        This is where accounts would be provisioned in a real deployment — each row here represents a login. Adding a
+        Field Staff account here also creates their staff profile, so they immediately show up in outreach fit-matching.
+      </div>
+      <div className="section-head" style={{marginTop:0}}>
+        <h2>User accounts</h2>
+        <button className="btn btn-primary btn-sm" onClick={()=>setShowAdd(true)}>+ Add user</button>
+      </div>
+      <div className="card" style={{padding:0}}>
+        <table>
+          <thead><tr><th style={{width:28}}>#</th><th>Name</th><th>Account Type</th><th>Details</th></tr></thead>
+          <tbody>
+            {rows.map((r,i)=>(
+              <tr key={r.id}>
+                <td className="ledger-idx">{String(i+1).padStart(2,"0")}</td>
+                <td><div className="row-flex"><Avatar name={r.name}/> <strong>{r.name}</strong></div></td>
+                <td><span className="tag">{r.accountType}</span></td>
+                <td className="muted" style={{fontSize:12.5}}>{r.detail}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {showAdd && (
+        <AddUserModal
+          onClose={()=>setShowAdd(false)}
+          onCreateStaff={(draft)=>{onAddStaff(draft); setShowAdd(false);}}
+          onCreateSenior={(draft)=>{onAddSeniorManager(draft); setShowAdd(false);}}
+        />
+      )}
+    </div>
+  );
+}
+
+function AddUserModal({onClose, onCreateStaff, onCreateSenior}){
+  const [accountType, setAccountType] = useState("field");
+  const [name, setName] = useState("");
+  const [title, setTitle] = useState("");
+  const [subRole, setSubRole] = useState("Trainer");
+  const [strength, setStrength] = useState("Informal");
+  const [homeRegion, setHomeRegion] = useState(REGIONS[0]);
+  const [customRegion, setCustomRegion] = useState("");
+  const [languages, setLanguages] = useState(["Luganda"]);
+
+  const toggleLang = (l) => setLanguages(prev => prev.includes(l) ? prev.filter(x=>x!==l) : [...prev, l]);
+  const resolvedRegion = homeRegion==="Other" ? customRegion.trim() : homeRegion;
+  const canSubmit = name.trim() && (accountType==="senior" ? title.trim() : (languages.length>0 && resolvedRegion));
+
+  const handleSubmit = () => {
+    if(!canSubmit) return;
+    if(accountType==="senior"){
+      onCreateSenior({name:name.trim(), title:title.trim()});
+    } else {
+      onCreateStaff({
+        name:name.trim(), role:subRole, strength, languages, homeRegion:resolvedRegion,
+        note:"Newly added — no track record yet", formalRate:60, informalRate:60, trips:0, status:"Available",
+      });
+    }
+  };
+
+  return (
+    <div className="modal-back" onClick={(e)=>{if(e.target===e.currentTarget) onClose();}}>
+      <div className="modal">
+        <div className="modal-head">
+          <div>
+            <h3 style={{margin:"0 0 4px"}}>Add a new user</h3>
+            <div className="muted" style={{fontSize:12.5}}>Creates a login and, for Field Staff, a matching staff profile used in outreach planning.</div>
+          </div>
+          <button className="x-close" onClick={onClose}>×</button>
+        </div>
+
+        <div className="field">
+          <label>Account type</label>
+          <div className="chip-select">
+            <span className={"chip "+(accountType==="senior"?"on":"")} onClick={()=>setAccountType("senior")}>Senior Manager</span>
+            <span className={"chip "+(accountType==="field"?"on":"")} onClick={()=>setAccountType("field")}>Field Staff</span>
+          </div>
+        </div>
+
+        <div className="field">
+          <label>Full name</label>
+          <input value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. Esther Nakimuli" />
+        </div>
+
+        {accountType==="senior" ? (
+          <div className="field">
+            <label>Title</label>
+            <input value={title} onChange={e=>setTitle(e.target.value)} placeholder="e.g. Senior Manager — Partnerships (Formal Sector)" />
+          </div>
+        ) : (
+          <>
+            <div className="grid cols-2">
+              <div className="field">
+                <label>Role</label>
+                <div className="chip-select">
+                  <span className={"chip "+(subRole==="Trainer"?"on":"")} onClick={()=>setSubRole("Trainer")}>Trainer</span>
+                  <span className={"chip "+(subRole==="Account Manager"?"on":"")} onClick={()=>setSubRole("Account Manager")}>Account Manager</span>
+                </div>
+              </div>
+              <div className="field">
+                <label>Sector strength</label>
+                <div className="chip-select">
+                  {["Informal","Formal","Both"].map(s=>(
+                    <span key={s} className={"chip "+(strength===s?"on":"")} onClick={()=>setStrength(s)}>{s}</span>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="field">
+              <label>Home region</label>
+              <select value={homeRegion} onChange={e=>setHomeRegion(e.target.value)}>
+                {REGIONS.map(r=><option key={r}>{r}</option>)}
+                <option value="Other">Other (type below)</option>
+              </select>
+              {homeRegion==="Other" && (
+                <div className="other-field">
+                  <input value={customRegion} onChange={e=>setCustomRegion(e.target.value)} placeholder="Enter the region name" />
+                </div>
+              )}
+            </div>
+            <div className="field">
+              <label>Languages</label>
+              <div className="chip-select">
+                {LANGUAGE_OPTIONS.map(l=>(
+                  <span key={l} className={"chip "+(languages.includes(l)?"on":"")} onClick={()=>toggleLang(l)}>{l}</span>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+
+        <div className="divider"></div>
+        <div className="row-flex" style={{justifyContent:"flex-end", gap:10}}>
+          <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
+          <button className="btn btn-primary" disabled={!canSubmit} onClick={handleSubmit}>Create account</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   APP SHELL
+   ============================================================ */
+
+const TABS = [
+  {id:"dashboard", label:"Dashboard", seniorOnly:false},
+  {id:"partners", label:"Partner Registry & Pipeline", seniorOnly:false},
+  {id:"plan", label:"Plan an Outreach", seniorOnly:true},
+  {id:"schedule", label:"Deployment Schedule", seniorOnly:false},
+  {id:"perdiem", label:"Per Diem", seniorOnly:true},
+  {id:"results", label:"Results & Insights", seniorOnly:false},
+  {id:"users", label:"Manage Users", seniorOnly:true},
+];
+
+const SEED_SENIOR_MANAGERS = [
+  {id:"SM01", name:"David Kintu", title:"Senior Manager — Financial Literacy"},
+  {id:"SM02", name:"Patricia Namono", title:"Senior Manager — Partnerships (Informal Sector)"},
+];
+
+function App(){
+  const [role, setRole] = useState("senior");
+  const [staff, setStaff] = useState(STAFF);
+  const [seniorManagers, setSeniorManagers] = useState(SEED_SENIOR_MANAGERS);
+  const [meId, setMeId] = useState(STAFF[0].id);
+  const [tab, setTab] = useState("dashboard");
+  const [openId, setOpenId] = useState(null);
+  const [outreaches, setOutreaches] = useState(initialOutreaches);
+  const [partners, setPartners] = useState(PARTNERS);
+  const [pipeline, setPipeline] = useState(initialPipeline);
+
+  const me = staff.find(s=>s.id===meId) || null;
+  const visibleTabs = TABS.filter(t=>!t.seniorOnly || role==="senior");
+
+  const goTo = (t, id) => { setTab(t); if(id) setOpenId(id); };
+
+  const setRoleGuarded = (nextRole) => {
+    setRole(nextRole);
+    const currentTabDef = TABS.find(t=>t.id===tab);
+    if(nextRole==="field" && currentTabDef?.seniorOnly){
+      setTab("dashboard");
+      setOpenId(null);
+    }
+  };
+
+  const addStaffMember = (draft) => {
+    const newId = "S" + String(staff.length+1).padStart(2,"0");
+    setStaff(prev => [...prev, {id:newId, ...draft}]);
+    return newId;
+  };
+
+  const addSeniorManager = (draft) => {
+    const newId = "SM" + String(seniorManagers.length+1).padStart(2,"0");
+    setSeniorManagers(prev => [...prev, {id:newId, ...draft}]);
+    return newId;
+  };
+
+  return (
+    <div className="shell">
+      <div className="rail">
+        <div className="rail-brand">
+          <div className="mark">E&amp;G Deployment Ledger</div>
+          <div className="sub">NSSF Uganda · Enterprise &amp; Growth</div>
+        </div>
+        <div>
+          {visibleTabs.map((t)=>{
+            const i = TABS.indexOf(t);
+            return (
+              <div key={t.id} className={"nav-item "+(tab===t.id?"active":"")} onClick={()=>{setTab(t.id); setOpenId(null);}}>
+                <span className="idx">{String(i+1).padStart(2,"0")}</span>{t.label}
+              </div>
+            );
+          })}
+        </div>
+        <div className="rail-foot">
+          <div className="label">Viewing as</div>
+          <div className="role-toggle">
+            <button className={role==="senior"?"active":""} onClick={()=>setRoleGuarded("senior")}>Senior Manager</button>
+            <button className={role==="field"?"active":""} onClick={()=>setRoleGuarded("field")}>Field Staff</button>
+          </div>
+          {role==="field" &&
+            <select className="who-select" value={meId} onChange={e=>setMeId(e.target.value)}>
+              {staff.map(s=><option key={s.id} value={s.id}>{s.name} — {s.role}</option>)}
+            </select>
+          }
+        </div>
+      </div>
+
+      <div className="main">
+        <div className="topbar">
+          <div className="title">{TABS.find(t=>t.id===tab)?.label}</div>
+          <div className="today">Tuesday, 21 July 2026</div>
+        </div>
+        <div className="content">
+          {tab==="dashboard" && (role==="senior"
+            ? <SeniorDashboard outreaches={outreaches} staff={staff} partners={partners} goTo={goTo}/>
+            : <FieldDashboard me={me} outreaches={outreaches} staff={staff}/>)}
+          {tab==="partners" && <PartnersView partners={partners} setPartners={setPartners} pipeline={pipeline} setPipeline={setPipeline} staff={staff} role={role}/>}
+          {tab==="plan" && role==="senior" && <PlanOutreach outreaches={outreaches} setOutreaches={setOutreaches} staff={staff} partners={partners} role={role} openId={openId} setOpenId={setOpenId}/>}
+          {tab==="schedule" && <ScheduleView outreaches={outreaches} staff={staff} partners={partners}/>}
+          {tab==="perdiem" && role==="senior" && <PerDiemView outreaches={outreaches} setOutreaches={setOutreaches} staff={staff} partners={partners} role={role}/>}
+          {tab==="results" && <ResultsView outreaches={outreaches} partners={partners} staff={staff}/>}
+          {tab==="users" && role==="senior" && <ManageUsersView staff={staff} seniorManagers={seniorManagers} onAddStaff={addStaffMember} onAddSeniorManager={addSeniorManager}/>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
