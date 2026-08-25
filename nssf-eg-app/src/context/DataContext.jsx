@@ -151,13 +151,21 @@ export function DataProvider({ children }) {
     return id;
   };
 
+  const updateEntityInsights = (id, updates) => {
+    if (id.startsWith("P")) {
+      setPartners((prev) => prev.map(p => p.id === id ? { ...p, ...updates } : p));
+    } else {
+      setPipeline((prev) => prev.map(l => l.id === id ? { ...l, ...updates } : l));
+    }
+  };
+
   const value = {
     staff, setStaff, addStaff,
     partners, setPartners,
     pipeline, setPipeline,
     outreaches, setOutreaches,
     createOutreach, toggleAssign, submitForApproval, approveOutreach, approvePerDiem,
-    recordResults, advanceStage, activateLead, identifyPartner,
+    recordResults, advanceStage, activateLead, identifyPartner, updateEntityInsights,
   };
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;

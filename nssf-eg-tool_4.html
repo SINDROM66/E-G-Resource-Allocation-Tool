@@ -233,6 +233,7 @@
   .perdiem-banner .seg.warn .n{color:var(--red);}
   .perdiem-banner .seg.ok .n{color:var(--forest-3);}
   .perdiem-banner .seg.wait .n{color:var(--gold-deep);}
+.hoverable-row:hover { background: rgba(0,0,0,0.02); }
 </style>
 </head>
 <body>
@@ -1851,7 +1852,13 @@ function App(){
           {tab==="schedule" && <ScheduleView outreaches={outreaches} staff={staff} partners={partners}/>}
           {tab==="perdiem" && role==="senior" && <PerDiemView outreaches={outreaches} setOutreaches={setOutreaches} staff={staff} partners={partners} role={role}/>}
           {tab==="results" && <ResultsView outreaches={outreaches} partners={partners} staff={staff}/>}
-          {tab==="personalisation" && <PersonalisationView partners={partners} pipeline={pipeline} staff={staff}/>}
+          {tab==="personalisation" && <PersonalisationView partners={partners} pipeline={pipeline} staff={staff} role={role} me={me} updateEntityInsights={(id, up) => {
+            if (id.startsWith("P")) {
+              setPartners((prev) => prev.map(p => p.id === id ? { ...p, ...up } : p));
+            } else {
+              setPipeline((prev) => prev.map(l => l.id === id ? { ...l, ...up } : l));
+            }
+          }}/>}
           {tab==="users" && role==="senior" && <ManageUsersView staff={staff} seniorManagers={seniorManagers} onAddStaff={addStaffMember} onAddSeniorManager={addSeniorManager}/>}
         </div>
       </div>
