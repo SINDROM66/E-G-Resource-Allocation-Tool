@@ -1,22 +1,12 @@
-import { useState } from "react";
-import { useData } from "../context/DataContext";
-import { useAuth } from "../context/AuthContext";
+import re
 
-export default function Personalisation() {
-  const { partners, pipeline, staff, updateEntityInsights } = useData();
-  const { currentUser } = useAuth();
-  
-  const canEdit = currentUser?.role === "senior";
-
+# 1. Update PersonalisationView string
+new_personalisation_view = '''function PersonalisationView({ partners, pipeline, staff, role, me, updateEntityInsights }) {
   const [editingEntity, setEditingEntity] = useState(null);
 
-  // Combine all active partners and pipeline leads that have needs assessment data
-  // But now since we want to allow editing, we might want to show all partners and leads, or at least let them edit the ones that have data.
-  // The user said "All they have to do is click on the Partener/Lead then a pop shoudl apear". 
-  // Let's keep showing the ones that have at least some data or maybe show all?
-  // I will just show all so they can edit those that don't have data yet.
-  const allEntities = [...partners, ...pipeline];
+  const canEdit = role === "senior" || (role === "field" && me?.role === "Personalisation");
   
+  const allEntities = [...partners, ...pipeline];
   const officerName = (id) => staff.find(s => s.id === id)?.name || "Unassigned";
 
   const handleRowClick = (entity) => {
@@ -36,7 +26,7 @@ export default function Personalisation() {
       </div>
       
       {allEntities.length === 0 ? (
-        <div className="empty">No partners or leads available yet.</div>
+        <div className="empty">No needs assessment data available yet. Please identify a new partner.</div>
       ) : (
         <div className="card" style={{ padding: 0 }}>
           <table>
@@ -61,7 +51,7 @@ export default function Personalisation() {
                   <td>
                     <strong>{entity.name}</strong>
                     <div className="muted" style={{ fontSize: 11.5 }}>
-                      {entity.stage ? `Pipeline: ${entity.stage}` : "Active Partner"}
+                      {entity.stage ? "Pipeline: " + entity.stage : "Active Partner"}
                     </div>
                   </td>
                   <td>
@@ -107,7 +97,7 @@ export default function Personalisation() {
 function EditInsightsModal({ entity, staff, onClose, onSave }) {
   const [sector, setSector] = useState(entity.sector || "Informal");
   const [formalSubcategory, setFormalSubcategory] = useState(
-    entity.sector === "Formal" ? entity.subcategory || "MD×Ministries/ Departments & Agencies" : "MD×Ministries/ Departments & Agencies"
+    entity.sector === "Formal" ? entity.subcategory || "MDA-Ministries/ Departments & Agencies" : "MDA-Ministries/ Departments & Agencies"
   );
   const [informalSubcategory, setInformalSubcategory] = useState(
     entity.sector === "Informal" ? entity.subcategory || "Saloonists" : "Saloonists"
@@ -153,7 +143,7 @@ function EditInsightsModal({ entity, staff, onClose, onSave }) {
             <label>Sector Category</label>
             {sector === "Formal" ? (
               <select value={formalSubcategory} onChange={(e) => setFormalSubcategory(e.target.value)}>
-                <option value="MD×Ministries/ Departments & Agencies">MD×Ministries/ Departments & Agencies</option>
+                <option value="MDA-Ministries/ Departments & Agencies">MDA-Ministries/ Departments & Agencies</option>
                 <option value="Mass Markets">Mass Markets</option>
               </select>
             ) : (
@@ -207,4 +197,54 @@ function EditInsightsModal({ entity, staff, onClose, onSave }) {
       </div>
     </div>
   );
-}
+}'''
+
+update_entity_str = '''{tab==="personalisation" && <PersonalisationView partners={partners} pipeline={pipeline} staff={staff} role={role} me={me} updateEntityInsights={(id, up) => {
+            if (id.startsWith("P")) {
+              setPartners((prev) => prev.map(p => p.id === id ? { ...p, ...up } : p));
+            } else {
+              setPipeline((prev) => prev.map(l => l.id === id ? { ...l, ...up } : l));
+            }
+          }}/>}'''
+
+staff_str = '''  {id:"S05", name:"Florence Kansiime", role:"Personalisation", strength:"Informal", languages:["Luganda","English","Runyankole"], homeRegion:"Mbarara", note:"Specializes in messaging for agriculture & transport", formalRate:60, informalRate:90, trips:8, avgOnboard:15.2, status:"Available"},
+  {id:"S06", name:"Ivan Sserwadda", role:"Personalisation", strength:"Formal", languages:["Luganda","English"], homeRegion:"Kampala", note:"Focuses on corporate & MDA messaging", formalRate:85, informalRate:55, trips:10, avgOnboard:18.5, status:"Available"}
+];'''
+
+# Process HTML files
+for file_path in [r'c:\Users\HP\Desktop\E&G-RESOURCE ALLOCATION TOOL\index.html', r'c:\Users\HP\Desktop\E&G-RESOURCE ALLOCATION TOOL\nssf-eg-tool_4.html']:
+    with open(file_path, 'r', encoding='utf-8') as f:
+        c = f.read()
+
+    # Replace PersonalisationView
+    start = c.find('function PersonalisationView')
+    end = c.find('const TABS = [')
+    if start != -1 and end != -1:
+        c = c[:start] + new_personalisation_view + '\n\n' + c[end:]
+
+    # Add updateEntityInsights
+    c = re.sub(r'\{tab==="personalisation" && <PersonalisationView partners=\{partners\} pipeline=\{pipeline\} staff=\{staff\}/?>\}', update_entity_str, c)
+
+    # Add staff
+    if "Ivan Sserwadda" not in c:
+        c = c.replace('];\n\nconst REGIONS', staff_str + '\n\nconst REGIONS')
+
+    with open(file_path, 'w', encoding='utf-8') as f:
+        f.write(c)
+
+# Process Vite app seed.js
+seed_path = r'c:\Users\HP\Desktop\E&G-RESOURCE ALLOCATION TOOL\nssf-eg-app\src\data\seed.js'
+with open(seed_path, 'r', encoding='utf-8') as f:
+    c = f.read()
+
+if "Ivan Sserwadda" not in c:
+    c = c.replace('];\n\nexport const PARTNERS', staff_str + '\n\nexport const PARTNERS')
+    # Also add them to the initial users
+    users_str = '''  { id: "U-05", username: "florence", password: "password", role: "field", name: "Florence Kansiime", title: "Personalisation", staffId: "S05" },
+  { id: "U-06", username: "ivan", password: "password", role: "field", name: "Ivan Sserwadda", title: "Personalisation", staffId: "S06" },
+];'''
+    c = c.replace('];\n\nexport const STAFF', users_str + '\n\nexport const STAFF')
+    with open(seed_path, 'w', encoding='utf-8') as f:
+        f.write(c)
+
+print('Success')

@@ -1,6 +1,6 @@
 export const REGIONS = ["Kampala", "Wakiso", "Mukono", "Jinja", "Gulu", "Mbarara", "Mbale"];
 export const HARDSHIP_REGIONS = ["Gulu", "Jinja", "Mbarara"];
-export const RATE = { Trainer: 120000, "Account Manager": 130000 };
+export const RATE = { "Financial Trainer": 120000, "Account Manager": 130000 };
 export const LANGUAGE_OPTIONS = ["Luganda", "English", "Acholi", "Swahili", "Runyankole", "Luo"];
 export const PIPELINE_STAGES = ["Identified", "Vetted & Contacted", "MOU Signed"];
 
@@ -11,15 +11,15 @@ export const TODAY = new Date("2026-07-21");
 export const DEMO_PASSWORD = "NssfEG@2026";
 
 export const STAFF = [
-  { id: "S01", name: "Aisha Nabatanzi", role: "Trainer", strength: "Informal", languages: ["Luganda", "English"], homeRegion: "Kampala", note: "Strong at market & vendor sensitization", formalRate: 55, informalRate: 88, trips: 14, status: "Available" },
-  { id: "S02", name: "Peter Okello", role: "Trainer", strength: "Formal", languages: ["English", "Acholi"], homeRegion: "Gulu", note: "Best with MDAs and school staff", formalRate: 84, informalRate: 50, trips: 11, status: "Available" },
+  { id: "S01", name: "Aisha Nabatanzi", role: "Financial Trainer", strength: "Informal", languages: ["Luganda", "English"], homeRegion: "Kampala", note: "Strong at market & vendor sensitization", formalRate: 55, informalRate: 88, trips: 14, status: "Available" },
+  { id: "S02", name: "Peter Okello", role: "Financial Trainer", strength: "Formal", languages: ["English", "Acholi"], homeRegion: "Gulu", note: "Best with MDAs and school staff", formalRate: 84, informalRate: 50, trips: 11, status: "Available" },
   { id: "S03", name: "Grace Namutebi", role: "Account Manager", strength: "Both", languages: ["Luganda", "English"], homeRegion: "Kampala", note: "High closer, adapts to any crowd", formalRate: 78, informalRate: 80, trips: 20, status: "Available" },
   { id: "S04", name: "Sam Lubega", role: "Account Manager", strength: "Informal", languages: ["Luganda", "English"], homeRegion: "Wakiso", note: "Boda boda & transport sector specialist", formalRate: 48, informalRate: 82, trips: 16, status: "Deployed" },
-  { id: "S05", name: "Josephine Achen", role: "Trainer", strength: "Formal", languages: ["English", "Acholi", "Luo"], homeRegion: "Gulu", note: "Confident presenter for civil servants", formalRate: 80, informalRate: 60, trips: 9, status: "Available" },
+  { id: "S05", name: "Josephine Achen", role: "Financial Trainer", strength: "Formal", languages: ["English", "Acholi", "Luo"], homeRegion: "Gulu", note: "Confident presenter for civil servants", formalRate: 80, informalRate: 60, trips: 9, status: "Available" },
   { id: "S06", name: "Moses Kato", role: "Account Manager", strength: "Formal", languages: ["English", "Luganda"], homeRegion: "Mukono", note: "Strong with SACCOs & local government", formalRate: 86, informalRate: 55, trips: 13, status: "Available" },
-  { id: "S07", name: "Fatuma Nabirye", role: "Trainer", strength: "Both", languages: ["Luganda", "Swahili", "English"], homeRegion: "Jinja", note: "Trusted in fishing & lakeside communities", formalRate: 60, informalRate: 79, trips: 10, status: "Available" },
+  { id: "S07", name: "Fatuma Nabirye", role: "Financial Trainer", strength: "Both", languages: ["Luganda", "Swahili", "English"], homeRegion: "Jinja", note: "Trusted in fishing & lakeside communities", formalRate: 60, informalRate: 79, trips: 10, status: "Available" },
   { id: "S08", name: "Brian Ssekandi", role: "Account Manager", strength: "Informal", languages: ["Luganda", "English"], homeRegion: "Kampala", note: "High energy, thrives at market events", formalRate: 45, informalRate: 85, trips: 18, status: "Deployed" },
-  { id: "S09", name: "Diana Auma", role: "Trainer", strength: "Formal", languages: ["English", "Acholi"], homeRegion: "Gulu", note: "New joiner, currently being mentored", formalRate: 62, informalRate: 45, trips: 3, status: "Available" },
+  { id: "S09", name: "Diana Auma", role: "Financial Trainer", strength: "Formal", languages: ["English", "Acholi"], homeRegion: "Gulu", note: "New joiner, currently being mentored", formalRate: 62, informalRate: 45, trips: 3, status: "Available" },
   { id: "S10", name: "Ronald Byaruhanga", role: "Account Manager", strength: "Both", languages: ["Luganda", "English", "Runyankole"], homeRegion: "Mbarara", note: "Versatile, covers the western region", formalRate: 70, informalRate: 72, trips: 12, status: "Available" },
 ];
 
@@ -53,9 +53,15 @@ export const INITIAL_OUTREACHES = [
 // on purpose — see README for what a production login would need instead.
 
 export const SENIOR_MANAGERS = [
-  { id: "U-SM01", username: "d.kintu", name: "David Kintu", title: "Senior Manager — Financial Literacy" },
-  { id: "U-SM02", username: "p.namono", name: "Patricia Namono", title: "Senior Manager — Partnerships (Informal Sector)" },
+  { id: "U-SM01", username: "head.eg", name: "Head of E&G (Chief)", title: "Head of E&G (Chief)" },
+  { id: "U-SM02", username: "head.informal", name: "Head Partnerships Informal Sector", title: "Head Partnerships Informal Sector" },
+  { id: "U-SM03", username: "head.formal", name: "Head Partnerships Formal Sector", title: "Head Partnerships Formal Sector" },
+  { id: "U-SM04", username: "financial.literacy", name: "Financial Literacy", title: "Financial Literacy" },
+  { id: "U-SM05", username: "business.executive", name: "Business Executive", title: "Business Executive" },
 ];
+
+export const SENIOR_MANAGER_POSITIONS = SENIOR_MANAGERS.map((manager) => manager.title);
+export const FIELD_STAFF_ROLES = ["Account Manager", "Financial Trainer"];
 
 function slugUsername(name) {
   const parts = name.toLowerCase().split(" ");

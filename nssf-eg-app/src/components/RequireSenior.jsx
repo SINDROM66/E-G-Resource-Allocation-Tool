@@ -7,9 +7,10 @@ import { useAuth } from "../context/AuthContext";
 // see README.md for what a production deployment needs instead (the data
 // itself must be withheld by a server that checks the logged-in user's
 // role, not just hidden by the interface).
-export default function RequireSenior({ children }) {
+export default function RequireSenior({ children, managerOnly = false }) {
   const { currentUser } = useAuth();
   if (!currentUser) return <Navigate to="/login" replace />;
   if (currentUser.role !== "senior") return <Navigate to="/dashboard" replace />;
+  if (managerOnly && currentUser.role !== "senior") return <Navigate to="/dashboard" replace />;
   return children;
 }

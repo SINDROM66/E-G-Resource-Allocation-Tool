@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useData } from "../context/DataContext";
 import { Avatar } from "../components/Avatar";
-import { REGIONS, LANGUAGE_OPTIONS, DEMO_PASSWORD } from "../data/seed";
+import { REGIONS, LANGUAGE_OPTIONS, DEMO_PASSWORD, SENIOR_MANAGER_POSITIONS, FIELD_STAFF_ROLES } from "../data/seed";
 
 export default function ManageUsers() {
   const { users, addUser } = useAuth();
@@ -10,8 +10,8 @@ export default function ManageUsers() {
   const [showAdd, setShowAdd] = useState(false);
 
   const handleCreate = (draft) => {
-    if (draft.accountType === "senior") {
-      addUser({ username: draft.username, password: draft.password, role: "senior", name: draft.name, title: draft.title, staffId: null });
+    if (draft.accountType !== "field") {
+      addUser({ username: draft.username, password: draft.password, role: draft.accountType, name: draft.name, title: draft.title, staffId: null });
     } else {
       const staffId = addStaff({
         name: draft.name, role: draft.subRole, strength: draft.strength, languages: draft.languages,
@@ -66,8 +66,8 @@ function slugUsername(name) {
 function AddUserModal({ onClose, onCreate }) {
   const [accountType, setAccountType] = useState("field");
   const [name, setName] = useState("");
-  const [title, setTitle] = useState("");
-  const [subRole, setSubRole] = useState("Trainer");
+  const [title, setTitle] = useState(SENIOR_MANAGER_POSITIONS[0]);
+  const [subRole, setSubRole] = useState(FIELD_STAFF_ROLES[0]);
   const [strength, setStrength] = useState("Informal");
   const [homeRegion, setHomeRegion] = useState(REGIONS[0]);
   const [languages, setLanguages] = useState(["Luganda"]);
@@ -75,7 +75,7 @@ function AddUserModal({ onClose, onCreate }) {
 
   const toggleLang = (l) => setLanguages((prev) => (prev.includes(l) ? prev.filter((x) => x !== l) : [...prev, l]));
   const username = slugUsername(name);
-  const canSubmit = name.trim() && username && password && (accountType === "senior" ? title.trim() : languages.length > 0);
+  const canSubmit = name.trim() && username && password && (accountType !== "field" ? title.trim() : languages.length > 0);
 
   return (
     <div className="modal-back" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
@@ -101,10 +101,12 @@ function AddUserModal({ onClose, onCreate }) {
           <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Esther Nakimuli" />
         </div>
 
-        {accountType === "senior" ? (
+        {accountType !== "field" ? (
           <div className="field">
             <label>Title</label>
-            <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Senior Manager — Partnerships (Formal Sector)" />
+            <select value={title} onChange={(e) => setTitle(e.target.value)}>
+              {SENIOR_MANAGER_POSITIONS.map((position) => <option key={position}>{position}</option>)}
+            </select>
           </div>
         ) : (
           <>
@@ -112,9 +114,7 @@ function AddUserModal({ onClose, onCreate }) {
               <div className="field">
                 <label>Role</label>
                 <div className="chip-select">
-                  <span className={"chip " + (subRole === "Trainer" ? "on" : "")} onClick={() => setSubRole("Trainer")}>Trainer</span>
-                  <span className={"chip " + (subRole === "Account Manager" ? "on" : "")} onClick={() => setSubRole("Account Manager")}>Account Manager</span>
-                  <span className={"chip " + (subRole === "Personalisation" ? "on" : "")} onClick={() => setSubRole("Personalisation")}>Personalisation</span>
+                  {FIELD_STAFF_ROLES.map((role) => <span key={role} className={"chip " + (subRole === role ? "on" : "")} onClick={() => setSubRole(role)}>{role}</span>)}
                 </div>
               </div>
               <div className="field">

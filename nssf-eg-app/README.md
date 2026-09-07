@@ -8,11 +8,12 @@ approval tracking, and field-time monitoring.
 
 1. Open this folder in VS Code.
 2. Open a terminal (`` Ctrl+` ``) and run:
-   ```
-   npm install
-   npm start
-   ```
-3. It opens automatically at `http://localhost:3000`. If it doesn't, open that URL yourself.
+  ``` 
+  npm install 
+  npm start 
+  ``` 
+3. In a second terminal, run `npm run server`.
+4. It opens automatically at `http://localhost:3000`. If it doesn't, open that URL yourself.
 
 ## Demo accounts
 
@@ -20,9 +21,12 @@ Every seeded account uses the same password: `NssfEG@2026`
 
 | Role | Username | Name |
 |---|---|---|
-| Senior Manager | `d.kintu` | David Kintu |
-| Senior Manager | `p.namono` | Patricia Namono |
-| Field Staff | `a.nabatanzi` | Aisha Nabatanzi (Trainer) |
+| Senior Manager | `head.eg` | Head of E&G (Chief) |
+| Senior Manager | `head.informal` | Head Partnerships Informal Sector |
+| Senior Manager | `head.formal` | Head Partnerships Formal Sector |
+| Senior Manager | `financial.literacy` | Financial Literacy |
+| Senior Manager | `business.executive` | Business Executive |
+| Field Staff | `a.nabatanzi` | Aisha Nabatanzi (Financial Trainer) |
 | Field Staff | `s.lubega` | Sam Lubega (Account Manager) |
 | Field Staff | *(any staff member — see Manage Users once logged in)* | |
 
@@ -41,7 +45,7 @@ Everything you enter — new outreaches, partner results, approvals, new users �
 and it starts fresh from the seed data. This is normal and expected for a local prototype, but it
 means **two people can't yet see the same live data**. That requires a real backend (see below).
 
-### Login is demo-grade, not secure
+## Security and production notes
 
 The current login checks a username/password against a list of accounts stored in the browser
 itself. This is fine for demonstrating the app, but it is **not secure**:
@@ -51,7 +55,7 @@ itself. This is fine for demonstrating the app, but it is **not secure**:
 - There's no password hashing, no session expiry, no protection against someone editing local
   storage directly to grant themselves Senior Manager access.
 
-### Page-level access control is real, but only goes so far
+### Page-level access control
 
 Field Staff genuinely cannot navigate to **Plan an Outreach**, **Per Diem**, or **Manage Users** —
 the router redirects them, and those pages don't render for their role. This is a real
@@ -61,7 +65,7 @@ the underlying data for those areas. Real security requires the **server** to re
 data in the first place to anyone who isn't authenticated as a Senior Manager — the frontend
 alone can never fully guarantee that.
 
-## What a production deployment would add
+## What a production deployment would still add
 
 To take this from "usable local tool" to "something NSSF IT would sign off on," the natural next
 step is a small backend, for example:

@@ -8,6 +8,7 @@ import { REGIONS } from "../data/seed";
 export default function Partners() {
   const { currentUser } = useAuth();
   const role = currentUser.role;
+  const canManage = role === "senior";
   const { partners, pipeline, staff, recordResults, advanceStage, activateLead, identifyPartner } = useData();
 
   const [subTab, setSubTab] = useState("active");
@@ -61,7 +62,7 @@ export default function Partners() {
               <thead>
                 <tr>
                   <th style={{ width: 28 }}>#</th><th>Partner</th><th>Region</th><th>Sector</th><th>Lead Initiator</th>
-                  <th>Attendees</th><th>Onboarded</th><th>Conversion</th>{role === "senior" && <th></th>}
+                  <th>Attendees</th><th>Onboarded</th><th>Conversion</th>{canManage && <th></th>}
                 </tr>
               </thead>
               <tbody>
@@ -84,7 +85,7 @@ export default function Partners() {
                           <span className="pill draft"><span className="pill-dot"></span>No data yet</span>
                         )}
                       </td>
-                      {role === "senior" && (
+                      {canManage && (
                         <td><button className="btn btn-ghost btn-sm" onClick={() => setResultsFor(p.id)}>Record results</button></td>
                       )}
                     </tr>
@@ -110,7 +111,7 @@ export default function Partners() {
                 <thead>
                   <tr>
                     <th style={{ width: 28 }}>#</th><th>Partner Lead</th><th>Region</th><th>Lead Initiator</th>
-                    <th>Pipeline Stage</th><th>Target Audience</th><th>Identified Date</th>{role === "senior" && <th></th>}
+                    <th>Pipeline Stage</th><th>Target Audience</th><th>Identified Date</th>{canManage && <th></th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -123,7 +124,7 @@ export default function Partners() {
                       <td><span className="pill pending"><span className="pill-dot"></span>{l.stage}</span></td>
                       <td className="mono">{l.targetAudience}</td>
                       <td className="mono">{fmtDate(l.identifiedDate)}</td>
-                      {role === "senior" && (
+                      {canManage && (
                         <td>
                           {l.stage !== "MOU Signed" ? (
                             <button className="btn btn-ghost btn-sm" onClick={() => advanceStage(l.id)}>Advance →</button>

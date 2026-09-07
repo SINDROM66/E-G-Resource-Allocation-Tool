@@ -1,12 +1,16 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { useAuth } from "./AuthContext";
 import { STAFF, PARTNERS, INITIAL_PIPELINE, INITIAL_OUTREACHES } from "../data/seed";
 import { loadState, saveState } from "../lib/storage";
 import { genId } from "../lib/engine";
+import { apiBootstrap, apiSaveState } from "../lib/api";
 
 const DataContext = createContext(null);
 
 export function DataProvider({ children }) {
-  const [staff, setStaff] = useState(() => loadState("staff", STAFF));
+  const { token, currentUser } = useAuth();
+  const hydrated = useRef(!token);
+  const [staff, setStaff] = useState(() => loadState("staff", STAFF).map((person) => person.role === "Trainer" ? { ...person, role: "Financial Trainer" } : person));
   const [partners, setPartners] = useState(() => loadState("partners", PARTNERS));
   const [pipeline, setPipeline] = useState(() => loadState("pipeline", INITIAL_PIPELINE));
   const [outreaches, setOutreaches] = useState(() => loadState("outreaches", INITIAL_OUTREACHES));
@@ -15,6 +19,18 @@ export function DataProvider({ children }) {
   useEffect(() => saveState("partners", partners), [partners]);
   useEffect(() => saveState("pipeline", pipeline), [pipeline]);
   useEffect(() => saveState("outreaches", outreaches), [outreaches]);
+  useEffect(() => {
+    if (!token) { hydrated.current = true; return; }
+    hydrated.current = false;
+    apiBootstrap(token).then((remote) => {
+      setStaff(remote.staff); setPartners(remote.partners); setPipeline(remote.pipeline); setOutreaches(remote.outreaches);
+      hydrated.current = true;
+    }).catch(() => { hydrated.current = true; });
+  }, [token]);
+  useEffect(() => { if (hydrated.current && token) apiSaveState("staff", staff, token).catch(() => {}); }, [staff, token]);
+  useEffect(() => { if (hydrated.current && token) apiSaveState("partners", partners, token).catch(() => {}); }, [partners, token]);
+  useEffect(() => { if (hydrated.current && token) apiSaveState("pipeline", pipeline, token).catch(() => {}); }, [pipeline, token]);
+  useEffect(() => { if (hydrated.current && token) apiSaveState("outreaches", outreaches, token).catch(() => {}); }, [outreaches, token]);
 
   // ---- outreach actions ----
   const createOutreach = (draft) => {

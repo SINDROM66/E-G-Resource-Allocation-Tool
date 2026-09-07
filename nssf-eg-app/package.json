@@ -6,6 +6,8 @@
   "scripts": {
     "start": "vite",
     "dev": "vite",
+    "server": "node server/server.mjs",
+    "start:all": "npm run server & npm run dev",
     "build": "vite build",
     "preview": "vite preview"
   },

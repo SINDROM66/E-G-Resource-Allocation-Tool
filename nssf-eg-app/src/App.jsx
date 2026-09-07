@@ -28,7 +28,7 @@ export default function App() {
             <Route path="perdiem" element={<RequireSenior><PerDiem /></RequireSenior>} />
             <Route path="results" element={<Results />} />
             <Route path="personalisation" element={<Personalisation />} />
-            <Route path="users" element={<RequireSenior><ManageUsers /></RequireSenior>} />
+            <Route path="users" element={<RequireSenior managerOnly><ManageUsers /></RequireSenior>} />
           </Route>
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>

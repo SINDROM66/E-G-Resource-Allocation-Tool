@@ -85,11 +85,11 @@ export default function PlanOutreach() {
 function OutreachDetail({ outreach, partnerLabel, staff, onClose, onToggleAssign, onSubmit, onApprove, onApprovePerDiem }) {
   const rec = getTeamTarget(outreach);
   const assignedStaff = outreach.assigned.map((id) => staff.find((s) => s.id === id)).filter(Boolean);
-  const assignedTrainers = assignedStaff.filter((s) => s.role === "Trainer").length;
+  const assignedTrainers = assignedStaff.filter((s) => s.role === "Financial Trainer").length;
   const assignedManagers = assignedStaff.filter((s) => s.role === "Account Manager").length;
 
   const candidates = staff.map((s) => ({ ...s, score: fitScore(s, outreach) })).sort((a, b) => b.score - a.score);
-  const trainerCandidates = candidates.filter((s) => s.role === "Trainer");
+  const trainerCandidates = candidates.filter((s) => s.role === "Financial Trainer");
   const managerCandidates = candidates.filter((s) => s.role === "Account Manager");
 
   const overStaffed = assignedStaff.length > rec.total;
@@ -115,19 +115,19 @@ function OutreachDetail({ outreach, partnerLabel, staff, onClose, onToggleAssign
           </div>
           <div className="card" style={{ padding: 14 }}>
             <div className="muted" style={{ fontSize: 11 }}>{rec.isOverridden ? "TEAM (MANAGER-SET)" : "RECOMMENDED TEAM"}</div>
-            <div style={{ fontSize: 14, fontWeight: 600, marginTop: 2 }}>{rec.trainers} Trainer{rec.trainers !== 1 ? "s" : ""} + {rec.managers} Acct. Mgr{rec.managers !== 1 ? "s" : ""}</div>
+            <div style={{ fontSize: 14, fontWeight: 600, marginTop: 2 }}>{rec.trainers} Financial Trainer{rec.trainers !== 1 ? "s" : ""} + {rec.managers} Acct. Mgr{rec.managers !== 1 ? "s" : ""}</div>
           </div>
           <div className="card" style={{ padding: 14 }}>
             <div className="muted" style={{ fontSize: 11 }}>ASSIGNED SO FAR</div>
             <div style={{ fontSize: 14, fontWeight: 600, marginTop: 2, color: overStaffed ? "var(--red)" : understaffed ? "var(--gold-deep)" : "var(--forest-3)" }}>
-              {assignedTrainers} Trainer{assignedTrainers !== 1 ? "s" : ""} + {assignedManagers} Mgr{assignedManagers !== 1 ? "s" : ""}
+              {assignedTrainers} Financial Trainer{assignedTrainers !== 1 ? "s" : ""} + {assignedManagers} Mgr{assignedManagers !== 1 ? "s" : ""}
               {overStaffed && " — over-staffed"}
               {understaffed && " — below recommendation"}
             </div>
           </div>
         </div>
 
-        <div className="section-head" style={{ margin: "18px 0 8px" }}><h2 style={{ fontSize: 15 }}>Best-fit Trainers</h2></div>
+        <div className="section-head" style={{ margin: "18px 0 8px" }}><h2 style={{ fontSize: 15 }}>Best-fit Financial Trainers</h2></div>
         {trainerCandidates.slice(0, 4).map((s) => <CandidateRow key={s.id} s={s} outreach={outreach} onToggleAssign={onToggleAssign} />)}
 
         <div className="section-head" style={{ margin: "22px 0 8px" }}><h2 style={{ fontSize: 15 }}>Best-fit Account Managers</h2></div>
@@ -313,7 +313,7 @@ function CreateOutreachModal({ partners, onClose, onCreate }) {
         </div>
 
         <div className="callout" style={{ marginTop: 2 }}>
-          Based on {expectedAudience || 0} expected participants, the tool recommends <strong>{rec.trainers} Trainer{rec.trainers > 1 ? "s" : ""} + {rec.managers} Account Manager{rec.managers > 1 ? "s" : ""}</strong>.
+          Based on {expectedAudience || 0} expected participants, the tool recommends <strong>{rec.trainers} Financial Trainer{rec.trainers > 1 ? "s" : ""} + {rec.managers} Account Manager{rec.managers > 1 ? "s" : ""}</strong>.
           Adjust below only if you know something the numbers don't — e.g. a difficult site, a first-time partner, or a known low-conversion history.
         </div>
 

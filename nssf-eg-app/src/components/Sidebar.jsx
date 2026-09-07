@@ -8,16 +8,17 @@ const ALL_TABS = [
   { path: "/perdiem", label: "Per Diem", seniorOnly: true },
   { path: "/results", label: "Results & Insights", seniorOnly: false },
   { path: "/personalisation", label: "Personalisation Insights", seniorOnly: false },
-  { path: "/users", label: "Manage Users", seniorOnly: true },
+  { path: "/users", label: "Manage Users", seniorOnly: true, managerOnly: true },
 ];
 
 export default function Sidebar({ role }) {
-  const tabs = ALL_TABS.filter((t) => !t.seniorOnly || role === "senior");
+  const isManagement = role === "senior";
+  const tabs = ALL_TABS.filter((t) => (!t.seniorOnly || isManagement) && (!t.managerOnly || role === "senior"));
 
   return (
     <div className="rail">
       <div className="rail-brand">
-        <div className="mark">E&amp;G Deployment Ledger</div>
+          <div className="mark">E<span className="brand-amp">&amp;</span>G Deployment Ledger</div>
         <div className="sub">NSSF Uganda · Enterprise &amp; Growth</div>
       </div>
       <div>
