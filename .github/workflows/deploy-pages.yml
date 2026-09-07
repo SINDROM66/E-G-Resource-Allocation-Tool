@@ -35,6 +35,8 @@ jobs:
       - name: Add SPA fallback
         working-directory: nssf-eg-app
         run: cp dist/index.html dist/404.html
+      - name: Add tool launcher
+        run: cp tool.html nssf-eg-app/dist/tool.html
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
