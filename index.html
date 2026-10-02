@@ -6,10 +6,2060 @@
 <title>E&amp;G Deployment Ledger — NSSF Uganda</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <script type="module" crossorigin src="/E-G-Resource-Allocation-Tool/assets/index-5uYh0E1l.js"></script>
-  <link rel="stylesheet" crossorigin href="/E-G-Resource-Allocation-Tool/assets/index-c-b4n_a1.css">
+
+<style>
+  :root{
+    --ink:#12201A;
+    --forest:#123A2C;
+    --forest-2:#1E5A43;
+    --forest-3:#2C7357;
+    --gold:#C79A3E;
+    --gold-deep:#A87E2C;
+    --paper:#F6F2E7;
+    --paper-2:#EFE9D8;
+    --line:#D8CFB8;
+    --line-soft:#E6E0CD;
+    --red:#A2402E;
+    --red-soft:#F3E1DC;
+    --green-soft:#E1EADB;
+    --white:#FFFDF8;
+    --shadow: 0 1px 2px rgba(18,32,26,0.06), 0 6px 20px rgba(18,32,26,0.05);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0; overflow-x:hidden;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  #root{min-height:100vh;}
+  h1,h2,h3,.display{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    letter-spacing:-0.01em;
+  }
+  .mono{font-family:'IBM Plex Mono', monospace;}
+  ::selection{background:var(--gold); color:var(--forest);}
+
+  /* ---------- shell ---------- */
+  .shell{display:flex; min-height:100vh;}
+  .rail{
+    width:248px; flex-shrink:0;
+    background:var(--forest);
+    color:var(--paper);
+    padding:28px 0 20px;
+    display:flex; flex-direction:column;
+    position:sticky; top:0; height:100vh;
+  }
+  .rail-brand{padding:0 24px 22px; border-bottom:1px solid rgba(246,242,231,0.14); margin-bottom:18px;}
+  .rail-brand .mark{
+    font-family:'Fraunces', serif; font-weight:700; font-size:20px; color:var(--gold);
+    letter-spacing:0.01em;
+  }
+  .rail-brand .sub{font-size:11px; color:rgba(246,242,231,0.6); margin-top:4px; letter-spacing:0.04em; text-transform:uppercase;}
+  .nav-item{
+    display:flex; align-items:baseline; gap:10px;
+    padding:11px 24px; cursor:pointer;
+    color:rgba(246,242,231,0.78);
+    font-size:14.5px; font-weight:500;
+    border-left:3px solid transparent;
+    transition:all .15s ease;
+  }
+  .nav-item .idx{font-family:'IBM Plex Mono',monospace; font-size:11px; color:rgba(246,242,231,0.4); width:16px;}
+  .nav-item:hover{background:rgba(246,242,231,0.06); color:var(--paper);}
+  .nav-item.active{
+    background:rgba(199,154,62,0.14);
+    border-left-color:var(--gold);
+    color:var(--white);
+  }
+  .nav-item.active .idx{color:var(--gold);}
+  .rail-foot{margin-top:auto; padding:18px 24px 0; border-top:1px solid rgba(246,242,231,0.14);}
+
+  .role-toggle{
+    display:flex; background:rgba(246,242,231,0.08); border-radius:8px; padding:3px; gap:2px;
+  }
+  .role-toggle button{
+    flex:1; border:none; background:transparent; color:rgba(246,242,231,0.65);
+    font-family:'IBM Plex Sans',sans-serif; font-size:12px; font-weight:600;
+    padding:7px 6px; border-radius:6px; cursor:pointer; transition:all .15s ease;
+  }
+  .role-toggle button.active{background:var(--gold); color:var(--forest);}
+  .rail-foot .label{font-size:10.5px; color:rgba(246,242,231,0.45); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:8px;}
+  .who-select{
+    width:100%; margin-top:10px; background:rgba(246,242,231,0.08); color:var(--white);
+    border:1px solid rgba(246,242,231,0.2); border-radius:6px; padding:8px 8px; font-size:13px;
+    font-family:'IBM Plex Sans',sans-serif;
+  }
+  .who-select option{color:var(--ink);}
+
+  .main{flex:1; min-width:0;}
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:22px 36px; border-bottom:1px solid var(--line);
+    background:var(--paper);
+  }
+  .topbar .title{font-size:24px;}
+  .topbar .today{font-size:12.5px; color:#6b6250; font-family:'IBM Plex Mono',monospace;}
+  .content{padding:28px 36px 60px;}
+
+  /* ---------- primitives ---------- */
+  .grid{display:grid; gap:16px;}
+  .cols-4{grid-template-columns:repeat(4,1fr);}
+  .cols-3{grid-template-columns:repeat(3,1fr);}
+  .cols-2{grid-template-columns:repeat(2,1fr);}
+  @media(max-width:1100px){.cols-4{grid-template-columns:repeat(2,1fr);} .cols-3{grid-template-columns:repeat(2,1fr);}}
+
+  .card{
+    background:var(--white); border:1px solid var(--line); border-radius:10px;
+    padding:20px; box-shadow:var(--shadow);
+    overflow-x:auto;
+  }
+  .kpi .num{font-family:'Fraunces',serif; font-size:32px; font-weight:600; color:var(--forest); line-height:1;}
+  .kpi .lbl{font-size:12.5px; color:#6b6250; margin-top:8px; letter-spacing:0.01em;}
+  .kpi .delta{font-size:11.5px; margin-top:6px; font-family:'IBM Plex Mono',monospace;}
+  .up{color:var(--forest-3);} .down{color:var(--red);}
+
+  .section-head{display:flex; align-items:baseline; justify-content:space-between; margin:34px 0 14px;}
+  .section-head:first-child{margin-top:0;}
+  .section-head h2{font-size:19px; margin:0;}
+  .section-head .hint{font-size:12.5px; color:#847a63;}
+
+  .btn{
+    font-family:'IBM Plex Sans',sans-serif; font-weight:600; font-size:13px;
+    border-radius:7px; padding:9px 16px; cursor:pointer; border:1px solid transparent;
+    transition:all .12s ease; display:inline-flex; align-items:center; gap:6px;
+  }
+  .btn-primary{background:var(--forest); color:var(--white);}
+  .btn-primary:hover{background:var(--forest-2);}
+  .btn-gold{background:var(--gold); color:var(--forest);}
+  .btn-gold:hover{background:var(--gold-deep); color:var(--white);}
+  .btn-ghost{background:transparent; border-color:var(--line); color:var(--ink);}
+  .btn-ghost:hover{border-color:var(--forest); color:var(--forest);}
+  .btn-danger{background:transparent; border-color:var(--red); color:var(--red);}
+  .btn-danger:hover{background:var(--red); color:white;}
+  .btn:disabled{opacity:0.45; cursor:not-allowed;}
+  .btn-sm{padding:6px 11px; font-size:12px;}
+
+  .pill{
+    display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:20px;
+    font-size:11px; font-weight:600; letter-spacing:0.02em; text-transform:uppercase;
+  }
+  .pill-dot{width:6px;height:6px;border-radius:50%;}
+  .pill.draft{background:#EFEADC; color:#7A7052;} .pill.draft .pill-dot{background:#A79C7C;}
+  .pill.pending{background:#FBEFD8; color:#8A5F16;} .pill.pending .pill-dot{background:var(--gold-deep);}
+  .pill.approved{background:var(--green-soft); color:var(--forest);} .pill.approved .pill-dot{background:var(--forest-3);}
+  .pill.completed{background:#E4E7F0; color:#3D4C7A;} .pill.completed .pill-dot{background:#5A6DA8;}
+  .pill.urgent{background:var(--red-soft); color:var(--red);} .pill.urgent .pill-dot{background:var(--red);}
+
+  table{width:100%; min-width:760px; border-collapse:collapse;}
+  th{
+    text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:0.05em;
+    color:#8a8065; font-weight:600; padding:0 12px 10px; border-bottom:1px solid var(--line);
+  }
+  td{padding:13px 12px; border-bottom:1px solid var(--line-soft); font-size:13.5px; vertical-align:middle;}
+  tr:last-child td{border-bottom:none;}
+  .ledger-idx{font-family:'IBM Plex Mono',monospace; color:#A79C7C; font-size:12px;}
+
+  .stamp{
+    display:inline-flex; align-items:center; justify-content:center;
+    border:2px solid currentColor; border-radius:6px; padding:3px 9px;
+    font-family:'IBM Plex Mono',monospace; font-size:10.5px; font-weight:700;
+    letter-spacing:0.09em; text-transform:uppercase;
+    line-height:1.5;
+  }
+  .stamp.ok{color:var(--forest-3);}
+  .stamp.wait{color:var(--gold-deep); border-style:dashed;}
+  .stamp.no{color:var(--red);}
+
+  .tag{
+    display:inline-block; padding:2px 8px; border-radius:5px; font-size:11px; font-weight:600;
+    background:var(--paper-2); color:#6b6250; margin:2px 4px 2px 0; border:1px solid var(--line);
+  }
+  .avatar{
+    width:30px; height:30px; border-radius:50%; background:var(--forest); color:var(--gold);
+    display:inline-flex; align-items:center; justify-content:center; font-size:12px; font-weight:700;
+    font-family:'IBM Plex Mono',monospace; flex-shrink:0;
+  }
+  .row-flex{display:flex; align-items:center; gap:10px;}
+  .muted{color:#8a8065;}
+  .divider{height:1px; background:var(--line); margin:22px 0;}
+
+  input, select, textarea{
+    font-family:'IBM Plex Sans',sans-serif; border:1px solid var(--line); border-radius:7px;
+    padding:9px 11px; font-size:13.5px; background:var(--white); color:var(--ink); width:100%;
+  }
+  label{font-size:12px; font-weight:600; color:#5c5442; margin-bottom:6px; display:block; letter-spacing:0.01em;}
+  .field{margin-bottom:16px;}
+
+  .fit-bar{height:6px; border-radius:4px; background:var(--paper-2); overflow:hidden; width:100%;}
+  .fit-bar > div{height:100%; background:var(--forest-3);}
+
+  .match-row{
+    display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid var(--line-soft);
+  }
+  .match-row:last-child{border-bottom:none;}
+  .badge-best{background:var(--gold); color:var(--forest); font-size:10px; font-weight:700; padding:2px 7px; border-radius:4px; text-transform:uppercase; letter-spacing:0.04em;}
+  .badge-good{background:var(--green-soft); color:var(--forest); font-size:10px; font-weight:700; padding:2px 7px; border-radius:4px; text-transform:uppercase; letter-spacing:0.04em;}
+  .badge-consider{background:var(--paper-2); color:#8a8065; font-size:10px; font-weight:700; padding:2px 7px; border-radius:4px; text-transform:uppercase; letter-spacing:0.04em;}
+
+  .empty{
+    text-align:center; padding:50px 20px; color:#a79c7c; border:1px dashed var(--line); border-radius:10px;
+  }
+  .callout{
+    border-left:3px solid var(--gold); background:#FBF6E8; padding:13px 16px; border-radius:0 8px 8px 0;
+    font-size:13px; color:#5c5442; margin-bottom:18px;
+  }
+  .callout.warn{border-left-color:var(--red); background:var(--red-soft); color:#7A2E20;}
+  .modal-back{
+    position:fixed; inset:0; background:rgba(18,32,26,0.45); display:flex; align-items:flex-start;
+    justify-content:center; padding:50px 20px; overflow-y:auto; z-index:50;
+  }
+  .modal{background:var(--white); border-radius:12px; max-width:640px; width:100%; padding:28px; box-shadow:0 20px 60px rgba(0,0,0,0.25);}
+  .modal-head{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:18px;}
+  .x-close{cursor:pointer; color:#8a8065; font-size:20px; border:none; background:none; line-height:1;}
+  .chip-select{display:flex; flex-wrap:wrap; gap:8px;}
+  .chip-select .chip{
+    padding:7px 13px; border:1px solid var(--line); border-radius:20px; font-size:12.5px; cursor:pointer; font-weight:500;
+  }
+  .chip-select .chip.on{background:var(--forest); color:white; border-color:var(--forest);}
+  .other-field{margin-top:8px;}
+  .perdiem-banner{display:flex; gap:14px; border-radius:10px; overflow:hidden; margin-bottom:24px; border:1px solid var(--line);}
+  .perdiem-banner .seg{flex:1; padding:16px 18px; background:var(--white);}
+  .perdiem-banner .seg + .seg{border-left:1px solid var(--line);}
+  .perdiem-banner .seg .n{font-family:'Fraunces',serif; font-size:26px; font-weight:600; line-height:1;}
+  .perdiem-banner .seg .l{font-size:11.5px; color:#8a8065; margin-top:6px;}
+  .perdiem-banner .seg.warn{background:var(--red-soft);}
+  .perdiem-banner .seg.warn .n{color:var(--red);}
+  .perdiem-banner .seg.ok .n{color:var(--forest-3);}
+  .perdiem-banner .seg.wait .n{color:var(--gold-deep);}
+.hoverable-row:hover { background: rgba(0,0,0,0.02); }
+</style>
 </head>
 <body>
 <div id="root"></div>
+
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script type="text/babel">
+const {useState, useMemo, useEffect} = React;
+
+const EXCEL_OUTREACHES = [{"name": "BODA BODA UNION ACTIVITIES SUMMARY", "region": "Central", "reach": 8425, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Activation_Report_Kanzari_Kibaale_District_March_2026", "region": "Western", "reach": 3440, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Activation_Report_in_Kiryandongo_ and_Bulambuli-Districts_Hamwe EA_April_2026", "region": "Western", "reach": 3067, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Report_on_Smartlife_Activation in Mubende District and Ggaba Market_May 2026", "region": "Central", "reach": 2706, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Activation_Report_Soya_Solutions_EA_Limited_Oyam_District_May_2026", "region": "Northern", "reach": 2500, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Activation_Report_Hamwe_Manafwa_District_May_2026", "region": "Eastern", "reach": 2337, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Activation_Report_Kole_District_In_Partnership_Soya_Solutions_EA_March_2026", "region": "Northern", "reach": 2188, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Report-Bududa Activation with Hamwe EA", "region": "Eastern", "reach": 1540, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Report_on_ Activation_KULIKA Uganda_Kyegegwa and Kasanda_Districts_April 2026", "region": "Western", "reach": 1421, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Report_Activation_in_Omoro_District_In_Partnership_AWR_June_2026", "region": "Northern", "reach": 1389, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "KULIKA KAMULI ACTIVITY SUMMARY", "region": "Eastern", "reach": 1274, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "NSSF LIRA HANDOVER 22.MAY.2026 - Attendance Lists", "region": "Northern", "reach": 1022, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "MITOOMA-MAHUNGYE", "region": "Western", "reach": 756, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Aleka Subcounty Headquarters, Aleka", "region": "Northern", "reach": 742, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "mukono, nakisunga subcounty 30th April, 2026 (1)", "region": "Central", "reach": 676, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Namutumba District - Reg Forms (2)", "region": "Eastern", "reach": 671, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Registration Forms - Kasawo Mukono", "region": "Central", "reach": 671, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Report on Activation with KULIKA Luwero District_June_2026", "region": "Central", "reach": 651, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "MITOOMA-KATERERA1", "region": "Western", "reach": 630, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Reg Forms - Jinja City", "region": "Eastern", "reach": 616, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "MITOOMA-KIYANGA", "region": "Western", "reach": 574, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Agweng, Lira", "region": "Northern", "reach": 546, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Report_Activation_Hamwe_Bulambuli District_April_2026", "region": "Eastern", "reach": 544, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Mukono scanned forms in Kyampisi sub county 6 May 2026 Attandance lists", "region": "Central", "reach": 494, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Bugweri District - Busesa Reg forms 1", "region": "Eastern", "reach": 451, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Mayuge District Reg forms", "region": "Eastern", "reach": 440, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "SHEEMA RUSHOZI attendance list Oct 2025", "region": "Western", "reach": 420, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Engagement_Report_On_Leaders_of_Kanzari_Groups_Kibaale_October_2025", "region": "Western", "reach": 400, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Mulundu Women's Farmers Group - Nabweya, Bududa District.", "region": "Eastern", "reach": 398, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "KAMULI MAGOGO DAY 1", "region": "Eastern", "reach": 392, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Pida, Oyam District - Day 1 - 04.05.27", "region": "Northern", "reach": 377, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Abok Subcounty Headquarters", "region": "Northern", "reach": 376, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Bukalasi Playgrounds - Bukalasi - Bududa District", "region": "Eastern", "reach": 374, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Ngai Subcounty Administration Headquarters, Ngai", "region": "Northern", "reach": 372, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Aleka, Oyam District - Day 1 - 04.05.27", "region": "Northern", "reach": 368, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "LUWERO KIKYUSA 8 JUNE 2026", "region": "Central", "reach": 350, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Aber (Noterber Business Hub), Oyam.", "region": "Northern", "reach": 346, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "NSSF Smart Life Flexi - Kigya Cooperative Registeration Forms.", "region": "Western", "reach": 342, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Kween kapkotch 29 June 2026 doc 1", "region": "Northern", "reach": 336, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "KAMULI KISOZI DAY 1", "region": "Eastern", "reach": 324, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Otwal Subcounty Headquarters, Otwal", "region": "Northern", "reach": 322, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Bubungi Grounds, Bududa.", "region": "Eastern", "reach": 308, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Registeration Forms - Kikholo, Bududa District.", "region": "Eastern", "reach": 297, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Saving forms odek", "region": "Northern", "reach": 294, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "SHEEMA KIHUNDA attendance list Oct 2025", "region": "Western", "reach": 294, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Manafwa- Buwaya", "region": "Eastern", "reach": 291, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Bumali Growers Cooperative- Buwali-  Bududa District", "region": "Eastern", "reach": 287, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Jinja - Buwenge Reg forms", "region": "Eastern", "reach": 286, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Bulambuli -Bunambutye Sub County Headquarters - NIN Nos. 21st April, 2026", "region": "Eastern", "reach": 280, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "lukoto 1", "region": "Northern", "reach": 275, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "KAMULI NAWANYAGO DAY 2", "region": "Eastern", "reach": 266, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Footo Primary School Playgrounds, Bushiyi", "region": "Eastern", "reach": 264, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Manafwa- Bugobero sc 24 scans (1).", "region": "Eastern", "reach": 264, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Manafwa-Buwagogo 1st sheet", "region": "Eastern", "reach": 264, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Olam village 1", "region": "Northern", "reach": 264, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Mubende, kasambya-kabunyasi", "region": "Central", "reach": 260, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Kihamba 2", "region": "Western", "reach": 256, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Footo Primary School Playgrounds, Bushiyi (1)", "region": "Eastern", "reach": 253, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Kiryandongo-Fungua Macho Non NINs 17th April, 2026 (1)", "region": "Western", "reach": 247, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Kibuye, Kyegegwa", "region": "Central", "reach": 245, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Nangako Town Council Grounds, Bududa.", "region": "Eastern", "reach": 242, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Kakwokwo Subcounty No NINs (1)", "region": "Western", "reach": 240, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Kween tarak 39 June 2026", "region": "Northern", "reach": 239, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Iceme - Tegony Primary School, Oyam District.", "region": "Northern", "reach": 238, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Kiryandongo-Fungua Macho Subcounty 17th April, 2026", "region": "Western", "reach": 237, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Mebende, kasambya-ndeeba", "region": "Central", "reach": 234, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Ikaali registration forms", "region": "Northern", "reach": 231, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "NSSF Smart Life Flexi - Kigumba-Mpumwe Parish Primary School - 14th April", "region": "Western", "reach": 224, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Mubende-Butawata", "region": "Central", "reach": 219, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "mbale market day 1 Jun 26", "region": "Eastern", "reach": 216, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "NYAKATOMA MONEY FORMS", "region": "Western", "reach": 216, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Rwawunga", "region": "Western", "reach": 204, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Registeration Forms - Namaistu, Bududa District", "region": "Eastern", "reach": 198, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Loro, Oyam Distrct - Day 2 - 05.05.27", "region": "Northern", "reach": 195, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "KABASAALA KIBAALE", "region": "Western", "reach": 187, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Akura, Oyam District - Day 2 - 05.05.27", "region": "Northern", "reach": 176, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "mubende, kasambya kiss", "region": "Central", "reach": 176, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Kiryandongo Nyamahasa-Alero Parish NINs 16th April", "region": "Western", "reach": 175, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "LUWERO BUSIKA  TOWN COUNCIL 8 JUNE 2026", "region": "Central", "reach": 172, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Kiryandongo-Mboira Subcounty NIN Nos 17th April, 2026", "region": "Western", "reach": 171, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Mubende, kasambya- kisizire", "region": "Central", "reach": 169, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Kween mwoyo 29 June 2026", "region": "Northern", "reach": 168, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Manafwa- Sisuni (1).", "region": "Eastern", "reach": 168, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Mbale Central Market - Day 3 Jun 26", "region": "Eastern", "reach": 165, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "mbale market day 2  Jun 26", "region": "Eastern", "reach": 165, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Amach -Awiodyek primary school  (Lira)", "region": "Northern", "reach": 160, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Kanyinya- OUR LADY OF GRACE CHURCH SAVER FORMS", "region": "Western", "reach": 157, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Manafwa- Sisuni (1)", "region": "Eastern", "reach": 157, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "kyakatwanga site money scans", "region": "Western", "reach": 156, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Kazinga miracle church payments", "region": "Central", "reach": 147, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Barr, Alevbere School - Lira", "region": "Northern", "reach": 145, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Kisambya", "region": "Western", "reach": 144, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Manafwa- Butiru", "region": "Eastern", "reach": 141, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Busaale 31-03-2026 18.05 ATTENDANCE LIST", "region": "Central", "reach": 140, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Mubende, Kasambya-Rwentabo.", "region": "Central", "reach": 140, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Kakwokwo Subcounty NIN Nos 17th April, 2026", "region": "Western", "reach": 137, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "kibuye payment forms", "region": "Central", "reach": 135, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Kiryandongo Nyamahasa Subcounty NINs- 16th April", "region": "Western", "reach": 135, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Bulambuli-Nabbongo Subcounty Headquarters - 22nd April, 2026", "region": "Eastern", "reach": 133, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Manafwa-Nalondo", "region": "Eastern", "reach": 133, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Kyamagabo", "region": "Western", "reach": 411, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "St John's Primary School", "region": "Western", "reach": 436, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "St Andrew's Catholic Church", "region": "Western", "reach": 216, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Olam village 2", "region": "Northern", "reach": 132, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "BUCUHYA KIBAALE", "region": "Western", "reach": 127, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Kihamba", "region": "Western", "reach": 120, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Mpara Community Playground MONEY CORRECTIONS 2", "region": "Western", "reach": 120, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Mubende, kasambya-Bututi", "region": "Central", "reach": 118, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Nyamahasa-Alero Parish Non NINs 16th April  (2)", "region": "Western", "reach": 117, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "KYAKATWANGA KIBAALE", "region": "Western", "reach": 115, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Wandaz Rubaga list 3", "region": "Central", "reach": 110, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Kakwokwo Subcounty No NINs", "region": "Western", "reach": 108, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "BUCUHYA KIBAALE", "region": "Western", "reach": 105, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "LUWERO BUSIKA 8 JUNE 2026", "region": "Central", "reach": 99, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Owacha Village 1", "region": "Northern", "reach": 99, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "kisyayumbe", "region": "Northern", "reach": 96, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Manafwa-Bugobero Tc  (1).", "region": "Eastern", "reach": 94, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Rusayumbe COU", "region": "Western", "reach": 87, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Kiryandongo Nyamahasa Subcounty Non NINs-16th April 2026", "region": "Western", "reach": 81, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Rutaraka cou kazinga town council", "region": "Western", "reach": 79, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "HAKASARABA KIBAALE", "region": "Western", "reach": 75, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Kibaale payment forms", "region": "Western", "reach": 68, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Isanga tc", "region": "Western", "reach": 67, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Lukoto no NIN numbers", "region": "Northern", "reach": 66, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Bulambuli-Ushindi Baptist Church, Buyaga NIN Nos. 21st April, 2026.", "region": "Eastern", "reach": 62, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Lukoto 2", "region": "Northern", "reach": 55, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Registration Forms Nakasero Day 1 Attendance list for 30th April 2026 (1)", "region": "Central", "reach": 52, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "NSSF Smart Life Flexi - New Life Church Forms.", "region": "Western", "reach": 47, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Kyebando Catholic Church", "region": "Western", "reach": 176, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "NSSF Smart Life Flexi - Kigumba Sub County Forms -13th April (1)", "region": "Western", "reach": 46, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "ruyonza", "region": "Western", "reach": 39, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Bugido money forms", "region": "Western", "reach": 32, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "HAMUGAMBA KIBAALE", "region": "Western", "reach": 30, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Bulambuli-Ushindi Baptist Church, Buyaga - Non NIN Nos. 21st April, 2026.", "region": "Eastern", "reach": 28, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Manafwa-Buwagogo 2nd sheet", "region": "Eastern", "reach": 22, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Bulambuli -Bunambutye Sub County Headquarters Non NINS. 21st April,2026.", "region": "Eastern", "reach": 19, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Kiryandongo-Bweyale Non NIN Nos 15th April 2026", "region": "Western", "reach": 19, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Bulambuli -Bunambutye Sub County Headquarters Non NINS. 21st April,2026. (1)", "region": "Eastern", "reach": 18, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Wandaz Rubaga list 2-1", "region": "Central", "reach": 15, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Kiryandongo-Mboira Subcounty Non NINS 17th April, 2026", "region": "Western", "reach": 13, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Owacha Viallge2", "region": "Northern", "reach": 12, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "Kiryandongo-Fungua Macho Non NINs 17th April, 2026 (1) (1)", "region": "Western", "reach": 10, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": null, "section": "Livelihoods"}, {"name": "LUWERO BAJJO ZONE II 2ND JULY 2026", "region": "Central", "reach": 98, "registered": 62, "enrolled": 38, "fy": "FY 26/27", "date": "2026-07-17", "section": "Livelihoods"}, {"name": "LUWERO KALULE 2ND JULY 2026", "region": "Central", "reach": 62, "registered": 34, "enrolled": 12, "fy": "FY 26/27", "date": "2026-07-02", "section": "Livelihoods"}, {"name": "LUWERO SSASSASSA  2ND JULY 2026", "region": "Central", "reach": 95, "registered": 57, "enrolled": 42, "fy": "FY 26/27", "date": "2026-07-02", "section": "Livelihoods"}, {"name": "Luwero Wobulenzi TC 22 JULY 2026", "region": "Central", "reach": 111, "registered": 0, "enrolled": 0, "fy": "FY 26/27", "date": "2026-07-22", "section": "Livelihoods"}, {"name": "Luwero Bombo TC 22 JULY 2026", "region": "Central", "reach": 90, "registered": 0, "enrolled": 0, "fy": "FY 26/27", "date": "2026-07-22", "section": "Livelihoods"}, {"name": "KOLE ALITO JOINT", "region": "Northern", "reach": 414, "registered": 290, "enrolled": 145, "fy": "FY 26/27", "date": "2026-07-22", "section": "Livelihoods"}, {"name": "KOLE OMOLO DYANG", "region": "Northern", "reach": 420, "registered": 249, "enrolled": 45, "fy": "FY 26/27", "date": "2026-07-08", "section": "Livelihoods"}, {"name": "LIRA ABER COMMERCIAL", "region": "Northern", "reach": 154, "registered": 104, "enrolled": 57, "fy": "FY 26/27", "date": "2026-07-08", "section": "Livelihoods"}, {"name": "TE OPOK 8TH JULY", "region": "Northern", "reach": 448, "registered": 203, "enrolled": 70, "fy": "FY 26/27", "date": "2026-07-08", "section": "Livelihoods"}, {"name": "TE OPOK 9TH JULY", "region": "Northern", "reach": 188, "registered": 0, "enrolled": 0, "fy": "FY 26/27", "date": "2026-07-09", "section": "Livelihoods"}, {"name": "NAMUSINDWA NAMABYA 23TH JUNE 2026", "region": "Eastern", "reach": 458, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": "2026-06-23", "section": "Livelihoods"}, {"name": "NAMUSINDWA NABITSIKHI 23RD JUNE 2026", "region": "Eastern", "reach": 193, "registered": 150, "enrolled": 62, "fy": "FY 25/26", "date": "2026-06-23", "section": "Livelihoods"}, {"name": "NAMUSINDWA MUFUTU  24TH JUNE 2026", "region": "Eastern", "reach": 366, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": "2026-06-26", "section": "Livelihoods"}, {"name": "NAMUSINDWA MAGALE 25TH JUNE 2026", "region": "Eastern", "reach": 205, "registered": 279, "enrolled": 80, "fy": "FY 25/26", "date": "2026-06-25", "section": "Livelihoods"}, {"name": "NAMUSINDWA BUMONI 24TH JUNE 2026", "region": "Eastern", "reach": 143, "registered": 98, "enrolled": 37, "fy": "FY 25/26", "date": "2026-06-24", "section": "Livelihoods"}, {"name": "NAMUSINDWA BUMBO 25TH JUNE 2026", "region": "Eastern", "reach": 370, "registered": 332, "enrolled": 49, "fy": "FY 25/26", "date": "2026-06-25", "section": "Livelihoods"}, {"name": "NAMUSINDWA BUKAHWEKA HAMWE 26TH JUNE 2026", "region": "Eastern", "reach": 476, "registered": 0, "enrolled": 0, "fy": "FY 25/26", "date": "2026-06-26", "section": "Livelihoods"}, {"name": "NAMUSINDWA BUBUTU 26TH JUNE 2026", "region": "Eastern", "reach": 406, "registered": 331, "enrolled": 133, "fy": "FY 25/26", "date": "2026-06-26", "section": "Livelihoods"}, {"name": "WAMALA ENETEBBE 25TH JULY 2026", "region": "Central", "reach": 168, "registered": 128, "enrolled": 61, "fy": "FY 26/27", "date": "2026-07-25", "section": "Livelihoods"}, {"name": "ST Anthony Lumansi - World Vision", "region": "Central", "reach": 97, "registered": 0, "enrolled": 0, "fy": "FY 26/27", "date": "2026-08-17", "section": "Livelihoods"}, {"name": "Bodaboda - Kamuli", "region": "Eastern", "reach": 1344, "registered": 0, "enrolled": 0, "fy": "FY 26/27", "date": "2026-08-20", "section": "Livelihoods"}, {"name": "World vision - Lukalu UMEA", "region": "Central", "reach": 107, "registered": 0, "enrolled": 0, "fy": "FY 26/27", "date": "2026-08-18", "section": "Livelihoods"}, {"name": "World Vision - Mpigi UMEA", "region": "Central", "reach": 135, "registered": 0, "enrolled": 0, "fy": "FY 26/27", "date": "2026-08-17", "section": "Livelihoods"}, {"name": "Mubz-Swift Minds", "region": "Central", "reach": 74, "registered": 0, "enrolled": 0, "fy": "FY 26/27", "date": "2026-08-05", "section": "Livelihoods"}, {"name": "Kyambogo University", "region": "Central", "reach": 52, "registered": 0, "enrolled": 0, "fy": "FY 26/27", "date": "2026-08-20", "section": "Livelihoods"}, {"name": "St. Kizito Mpigi- World Vision", "region": "Central", "reach": 169, "registered": 0, "enrolled": 0, "fy": "FY 26/27", "date": "2026-08-20", "section": "Livelihoods"}, {"name": "DECODI Soroti Roadshow list Sept 2026", "region": "Eastern", "reach": 59, "registered": 0, "enrolled": 0, "fy": "FY 26/27", "date": "2026-09-16", "section": "Livelihoods"}, {"name": "Boda Union - Kamuli", "region": "Eastern", "reach": 574, "registered": 0, "enrolled": 0, "fy": "FY 26/27", "date": "2026-09-17", "section": "Livelihoods"}, {"name": "Leadership Cohort Mgt Training", "region": "Central", "reach": 50, "registered": 0, "enrolled": 0, "fy": "FY 26/27", "date": "2026-07-13", "section": "FL"}, {"name": "Luweero Ssassassa", "region": "Central", "reach": 46, "registered": 0, "enrolled": 0, "fy": "FY 26/27", "date": "2026-07-02", "section": "FL"}, {"name": "URC", "region": "Central", "reach": 32, "registered": 0, "enrolled": 0, "fy": "FY 26/27", "date": null, "section": "FL"}, {"name": "Bwebajja Medical Chews", "region": "Central", "reach": 108, "registered": 0, "enrolled": 0, "fy": "FY 26/27", "date": null, "section": "FL"}, {"name": "Day 2 world vision", "region": "Central", "reach": 255, "registered": 0, "enrolled": 0, "fy": "FY 26/27", "date": null, "section": "FL"}, {"name": "Parents Mpigi umea primary school world vision", "region": "Central", "reach": 127, "registered": 0, "enrolled": 0, "fy": "FY 26/27", "date": null, "section": "FL"}, {"name": "pupils mpigi umea primary school world vision", "region": "Central", "reach": 255, "registered": 0, "enrolled": 0, "fy": "FY 26/27", "date": null, "section": "FL"}, {"name": "SGA", "region": "Central", "reach": 176, "registered": 0, "enrolled": 0, "fy": "FY 26/27", "date": "2026-08-15", "section": "FL"}, {"name": "St kizito primary parents -world vision day four", "region": "Central", "reach": 165, "registered": 0, "enrolled": 0, "fy": "FY 26/27", "date": "2026-08-20", "section": "FL"}, {"name": "St Anthony Nalumansi PS Mpigi pupils", "region": "Central", "reach": 173, "registered": 0, "enrolled": 0, "fy": "FY 26/27", "date": null, "section": "FL"}, {"name": "St Anthony Nalumansi PS Mpigi parents", "region": "Central", "reach": 199, "registered": 0, "enrolled": 0, "fy": "FY 26/27", "date": null, "section": "FL"}, {"name": "St Anthony Nalumansi PS Mpigi parents", "region": "Central", "reach": 100, "registered": 0, "enrolled": 0, "fy": "FY 26/27", "date": "2026-08-19", "section": "FL"}, {"name": "St Kizito Mpigi pupils co world day 4", "region": "Central", "reach": 224, "registered": 0, "enrolled": 0, "fy": "FY 26/27", "date": "2026-08-20", "section": "FL"}, {"name": "Wakiso medical chews", "region": "Central", "reach": 36, "registered": 0, "enrolled": 0, "fy": "FY 26/27", "date": null, "section": "FL"}, {"name": "Abim UCEM COOPERATIVE", "region": "Central", "reach": 151, "registered": 0, "enrolled": 0, "fy": "FY 26/27", "date": "2026-08-01", "section": "FL"}, {"name": "DECODI Soroti Roadshow list 23rd Sept 2026", "region": "Eastern", "reach": 52, "registered": 0, "enrolled": 0, "fy": "FY 26/27", "date": "2026-09-23", "section": "Livelihoods"}, {"name": "INSSF", "region": "Central", "reach": 46, "registered": 0, "enrolled": 0, "fy": "FY 26/27", "date": null, "section": "Livelihoods"}, {"name": "UNOC MPIGI 14TH- 16TH SEPT 2026", "region": "Central", "reach": 120, "registered": 0, "enrolled": 0, "fy": "FY 26/27", "date": "2026-09-14", "section": "Livelihoods"}, {"name": "Lwengo", "region": "Central", "reach": 260, "registered": 0, "enrolled": 0, "fy": "FY 26/27", "date": "2026-09-23", "section": "FL"}, {"name": "Kyotera", "region": "Central", "reach": 340, "registered": 0, "enrolled": 0, "fy": "FY 26/27", "date": "2026-09-25", "section": "FL"}, {"name": "Rakai forms", "region": "Central", "reach": 340, "registered": 0, "enrolled": 0, "fy": "FY 26/27", "date": "2026-09-24", "section": "FL"}];
+
+const EXCEL_PARTNERS = [{"name": "Bodaboda Union", "registrations": 21911, "sector": "Transport & Mobility", "description": "Transport Union Alliance, brings different players in the transport sector together and innovates products to support them and improve their work."}, {"name": "Hamwe East Africa Limited", "registrations": 9217, "sector": "Agriculture", "description": "Agri-tech company that uses mobile technology (SMS, USSD, mobile money, and apps) to  educate and connect farmers, agro-input suppliers, and buyers"}, {"name": "Wandaz and Federation of Uganda Salons and Beauty Professionals", "registrations": 6326, "sector": "Trades & Services", "description": "Umbrella body for salon operators across Uganda."}, {"name": "Kulika Uganda", "registrations": 0, "sector": "Agriculture", "description": "NGO that promotes  organic agriculture, farmer-to-farmer extension, and market linkages while also administering scholarships and vocational training in agriculture."}, {"name": "Soya Solutions Eastern Africa Ltd -Kole District", "registrations": 4527, "sector": "Agriculture", "description": "A company focused on developing sustainable, commercial soybean value chain operations in emerging markets in Sub-Saharan Africa. Works with over 3k farmers"}, {"name": "Mukono District Local Government", "registrations": 3379, "sector": "Trade & Commerce", "description": ""}, {"name": "Nuwebiz CUF Lira", "registrations": 1682, "sector": "Agriculture", "description": "NUWEBIZ Foundation is a women-led enterprise support network dedicated to empowering women entrepreneurs through market access, business digital literacy, financial literacy, etc."}, {"name": "Busaale Technical", "registrations": 1236, "sector": "Education", "description": "Vocation traing ng Institute in Kayunga District"}, {"name": "Stewards of Grace", "registrations": 1122, "sector": "Agriculture", "description": "A faith-rooted, non-governmental organization helping widows, orphans, etc"}, {"name": "Kanzari Saving Group-Kibaale", "registrations": 1084, "sector": "Agriculture", "description": "Community-based financial development initiatives in Buyanja East, Kibaale District, Uganda, founded by Member of Parliament Dr. Emely Kugonza to help locals escape exploitative money lenders."}, {"name": "African Women Raising", "registrations": 882, "sector": "Others", "description": "A highly impactful, community-led non-profit organization founded in 2006 to empower women and girls in post-conflict zones and help them rebuild their lives."}, {"name": "Sironko Coffee Gardens", "registrations": 665, "sector": "Agriculture", "description": "In partnership with coffee farmers in Eastern Uganda, they produce specialty Arabica coffee."}, {"name": "Nakawa Market", "registrations": 606, "sector": "Trade & Commerce", "description": "Market"}, {"name": "World Vision", "registrations": 579, "sector": "Education", "description": "World Vision is a global Christian relief, development, and advocacy organization dedicated to working with children, families, and their communities worldwide to reach their full potential by tackling the causes of poverty and injustice."}, {"name": "COFTU and NOTU", "registrations": 506, "sector": "Trade & Commerce", "description": "Trade Unions"}, {"name": "Mitooma", "registrations": 496, "sector": "Agriculture", "description": ""}, {"name": "Owino", "registrations": 490, "sector": "Trade & Commerce", "description": "Market"}, {"name": "Uganda Nurses and Midwives Union", "registrations": 451, "sector": "Health Care", "description": "Uganda Nurses and Midwives Union"}, {"name": "Sheema", "registrations": 409, "sector": "Agriculture", "description": ""}, {"name": "Nile Breweries Limited", "registrations": 407, "sector": "Manufacturing", "description": "Beer Manufacturer"}, {"name": "Medical Clinical Officers Professionals-uganda(mcop-u)", "registrations": 406, "sector": "Health Care", "description": "Legally registered professional association that unites and advocates for Medical Clinical Officers (MCOs) across Uganda"}, {"name": "National Council for Higher Education (NCHE)", "registrations": 392, "sector": "Education", "description": "Uganda's statutory agency mandated to regulate, guide, and ensure the delivery of quality and relevant higher education."}, {"name": "Creative Initiative for Enterprise Development", "registrations": 365, "sector": "Agriculture", "description": "Non-profit social enterprise in Uganda registered in 2013 to improve the lives of vulnerable low-income communities, particularly women, youth, and children"}, {"name": "Nakasero Market", "registrations": 364, "sector": "Trade & Commerce", "description": "Market"}, {"name": "Hotel Apprentices Program (UHOA) ILO Project", "registrations": 270, "sector": "Tourism & Hospitality", "description": "The Uganda Hotel Owners Association (UHOA) runs a National Apprenticeship Program in partnership with the International Labour Organization (ILO) and the Ministry of Gender to equip youth, including refugees and host communities, with practical hospitality skills"}, {"name": "Nche Kyambogo University", "registrations": 240, "sector": "Education", "description": ""}, {"name": "Uganda Salon Association", "registrations": 211, "sector": "Trades & Services", "description": "Uganda Salon Association"}, {"name": "Addie Innovations", "registrations": 190, "sector": "Education", "description": "A social enterprise based in Uganda that focuses on community challenges like poverty, gender inequalities, poor quality of education, youth unemployment, and sexual and reproductive health"}, {"name": "Doboozi Lyo Sacco", "registrations": 176, "sector": "Agriculture", "description": "Doboozi Lyo Sacco is a registered partner organization or group listed under the livelihoods category in the NSSF Partner Management System."}, {"name": "Mpanga Market", "registrations": 133, "sector": "Trade & Commerce", "description": "Market"}, {"name": "Mbale Central Market", "registrations": 128, "sector": "Trade & Commerce", "description": "Market"}, {"name": "CBS Pewosa", "registrations": 115, "sector": "Financial Services", "description": "CBS PEWOSA (Project to Empower Women Through Savings and Loan Associations) is a community development and financial initiative."}, {"name": "MTN Uganda", "registrations": 101, "sector": "ICT & Digital", "description": "Telecomunications company"}, {"name": "Watoto Church Neighborhood Mothers", "registrations": 92, "sector": "Others", "description": "Watoto Church Neighborhood Mothers is an initiative by Watoto Church designed to restore dignity, provide holistic care, and empower vulnerable women and mothers in Uganda and South Sudan"}, {"name": "Failu Skills Training Hub", "registrations": 92, "sector": "Education", "description": "Partner or stakeholder entity within programs related to social development and livelihood initiatives in Uganda"}, {"name": "Grace Foundation", "registrations": 86, "sector": "Education", "description": "A community-focused charity working in Bulunza, Iganga District, to support local health, education, and social-economic development."}, {"name": "Flourish Hub", "registrations": 85, "sector": "Trades & Services", "description": "Flourish Hub Uganda is a female-focused entrepreneurship support organization based in Kampala, Uganda, that empowers women through mentorship, training, and networking"}, {"name": "The Elites-Masaka City", "registrations": 64, "sector": "Trades & Services", "description": "Group of pastors"}, {"name": "Group Pay", "registrations": 63, "sector": "Agriculture", "description": "GroupPay (operating as Social Pay) in Uganda is an emerging digital financial platform designed to digitize group-based payments, savings, and collective financial management for informal savings groups, cooperatives, and community organizations."}, {"name": "Busukuma Twegate Bodaboda Sacco", "registrations": 60, "sector": "Transport & Mobility", "description": "Bodaboda savings group"}, {"name": "Muwanga Grain Producers Cooperative Society Limited-Kiboga", "registrations": 40, "sector": "Agriculture", "description": "Muwanga Grain Producers Cooperative Society Limited is an agricultural cooperative based in Kiboga District, Uganda, that supports local farmers with grain production and market access."}, {"name": "Towa na Uchafu", "registrations": 39, "sector": "Others", "description": "Sustainable waste management initiative in Uganda that purchases sorted waste, promotes recycling, and educates communities on proper sanitation"}, {"name": "Structured Imams & Amirats Assembly of Uganda", "registrations": 37, "sector": "Trades & Services", "description": "Islamic leadership organization in Uganda that promotes the welfare of mosque leaders, community development, and unity among Muslims. [1, 2]"}, {"name": "Diaspora-SA", "registrations": 33, "sector": "Diaspora", "description": "People in Diaspora SA"}, {"name": "Swift Minds", "registrations": 31, "sector": "Others", "description": "HR Consultancy company"}, {"name": "Futsol Association", "registrations": 26, "sector": "Sports & Recreation", "description": "(FAU) is the official governing body responsible for developing, promoting, and managing the sport of futsal in Uganda"}, {"name": "NOTU Youth", "registrations": 22, "sector": "Trade & Commerce", "description": "The NOTU Youth Committee is the dedicated youth wing of the National Organisation of Trade Unions (NOTU), Uganda's largest labor federation representing millions of workers across 39 affiliated unions."}, {"name": "Mwajuma Esther- Commission Agent", "registrations": 20, "sector": "Others", "description": "Commission Agent"}, {"name": "Kcca Healthworkers And Teachers", "registrations": 19, "sector": "Health Care", "description": ""}, {"name": "Nabagala Jamidah -Agent", "registrations": 18, "sector": "Others", "description": "Commission Agent"}, {"name": "Isbat University", "registrations": 18, "sector": "Education", "description": "University"}, {"name": "BOU Training of Trainers", "registrations": 17, "sector": "Education", "description": ""}, {"name": "Wilph Uganda", "registrations": 16, "sector": "Others", "description": "WILPF Uganda is a national section of the Women's International League for Peace and Freedom that works to empower grassroots women and promote peaceful conflict resolution."}, {"name": "Pearl Bank", "registrations": 15, "sector": "Financial Services", "description": "Bank"}, {"name": "Alma Impact Hub Foundation Limited", "registrations": 13, "sector": "Others", "description": "Non-governmental organization committed to equipping the leaders of the day and the future to fight ignorance and poverty of every sense."}, {"name": "Sheema North", "registrations": 12, "sector": "Agriculture", "description": ""}, {"name": "Masaka Elites and Ministers Development Association", "registrations": 12, "sector": "Trades & Services", "description": ""}, {"name": "Ripple Effect-Isingiro", "registrations": 12, "sector": "Agriculture", "description": "An international non-governmental organization that works with rural smallholder farmers to eradicate poverty, build climate resilience, and improve livelihoods. Today, the organization focuses on sustainable agriculture, enterprise development, and social inclusion."}, {"name": "Petroleum Authority of Uganda", "registrations": 11, "sector": "Oil & Mining", "description": "Governmental statutory body established under the Petroleum Act 2013 to monitor and regulate the exploration, development, production, refining, transportation, storage, and gas conversion of petroleum in Uganda"}, {"name": "Usafi", "registrations": 11, "sector": "Trade & Commerce", "description": "Usafi Market"}, {"name": "Soybean Empowerment for Economic Dev't & Social Protection", "registrations": 10, "sector": "Agriculture", "description": ""}, {"name": "Uganda National Traders Alliance", "registrations": 10, "sector": "Trade & Commerce", "description": "The Uganda National Traders Alliance (UNATA) is an umbrella organization established in November 2024 to unite business associations, companies, and individual traders across Uganda. Led by President Godfrey Katongole, the alliance acts as a unified voice for the trading community, addressing commercial challenges and engaging with the government."}, {"name": "Betaleaf", "registrations": 9, "sector": "Agriculture", "description": "An agricultural and environmental solutions company in Uganda that focuses on sustainable farming, ecosystem restoration, and contract farming. Core services include agro-inputs, contract farming, farm extension services, eco-system restoration & forestry, etc."}, {"name": "Ministry Of ICT", "registrations": 9, "sector": "ICT & Digital", "description": "The ministry formulates, coordinates, and monitors policies and strategies that harness information and communications technology for national development."}, {"name": "Youth Entrepreneurship Skills Uganda", "registrations": 8, "sector": "Education", "description": "YOUTH Entrepreneurship Skills Uganda (YES-UGANDA) is a grassroots, community-based organization located in Matugga-Mabanda, Gombe Division, Nansana Municipality, Wakiso District, Uganda. Offers workshops and programs focusing on entrepreneurship, business management, and soft skills to improve youth employability."}, {"name": "Truckers Association", "registrations": 7, "sector": "Manufacturing", "description": "Association of truck drivers"}, {"name": "Mkazipreneur Se Ltd", "registrations": 6, "sector": "Education", "description": "Mkazipreneur Social Enterprise (SE) Ltd is a prominent Ugandan community platform and enterprise support organization dedicated to promoting qualitative and quantitative women’s entrepreneurship across Africa. Founded in 2018 by Immy Nakyeyune, the platform actively bridges the gender gap in business by providing female entrepreneurs with necessary financial literacy, technology skills, funding access, and market networks."}, {"name": "Bunamwaya Community Engagement", "registrations": 6, "sector": "Trades & Services", "description": ""}, {"name": "CSP 2016 Welfare SACCO", "registrations": 6, "sector": "Agriculture", "description": ""}, {"name": "Suubi Lyabaana CDC", "registrations": 6, "sector": "Others", "description": "Suubi lya baana (meaning \"Hope of children\" in Luganda) is a non-profit association founded in Hamburg, Germany, that partners with Ugandan organizations to support vulnerable and street children"}, {"name": "ZACKE BASHIR Bukomero Kiboga Agent", "registrations": 6, "sector": "Others", "description": ""}, {"name": "Diaspora–Rwanda", "registrations": 5, "sector": "Diaspora", "description": "People in Diaspora Rwanda"}, {"name": "Muwanga Grain Producers Cooperative Society Limited", "registrations": 5, "sector": "Agriculture", "description": "Muwanga Grain Producers Cooperative Society Limited is an agricultural cooperative based in the Kiboga District of Uganda that organizes smallholder farmers for bulk grain production, processing, and collective marketing"}, {"name": "Nakasero Market Agent - Justine Nabirye", "registrations": 5, "sector": "Trade & Commerce", "description": "Market Comission Agent"}, {"name": "Nicholas Mukaaya -Agent", "registrations": 5, "sector": "Others", "description": ""}, {"name": "Glovo", "registrations": 4, "sector": "Transport & Mobility", "description": "Food delivery company"}, {"name": "Kampala Printers Association", "registrations": 4, "sector": "Trades & Services", "description": "Body that brings printers together"}, {"name": "Terego Refugee and Host Community Project ILO", "registrations": 3, "sector": "Others", "description": "The International Labour Organization (ILO) implements the PROSPECTS Partnership in the Terego District to support both refugee settlement and local host communities"}, {"name": "Ssenkezi Joseph-Influencer Kabale University", "registrations": 2, "sector": "Education", "description": ""}, {"name": "Imagine Uganda", "registrations": 2, "sector": "Others", "description": ""}, {"name": "KPSM", "registrations": 1, "sector": "Others", "description": ""}, {"name": "Africa Women Rising", "registrations": 1, "sector": "Others", "description": "African Women Rising (AWR) is a non-governmental organization (NGO) founded in 2006 to empower women and families affected by war and conflict in Northern Uganda"}, {"name": "Federation of Uganda employers", "registrations": 1, "sector": "Others", "description": "The Federation of Uganda Employers (FUE) is the premier, officially recognized organization representing employers' interests in Uganda on social and economic policy issues"}, {"name": "Hub", "registrations": 1, "sector": "Trades & Services", "description": ""}, {"name": "Ministry of Gender Labour and Social Development", "registrations": 1, "sector": "Others", "description": "A cabinet-level government ministry in Uganda responsible for empowering communities, promoting gender equality, and managing labour administration."}, {"name": "NAGRIC  Entebbe", "registrations": 1, "sector": "Agriculture", "description": "A statutory, semi-autonomous agency under Uganda's Ministry of Agriculture, Animal Industry and Fisheries (MAAIF). Established by the Animal Breeding Act of 2001, the body is headquartered in Entebbe and leads the commercialization, development, and regulation of livestock genetics and breeding services"}, {"name": "Rwampara", "registrations": 1, "sector": "Agriculture", "description": ""}, {"name": "Registration Not Tagged", "registrations": 0, "sector": "Others", "description": ""}, {"name": "Kulika Uganda-Mityana", "registrations": 0, "sector": "Agriculture", "description": "NGO that promotes  organic agriculture, farmer-to-farmer extension, and market linkages while also administering scholarships and vocational training in agriculture."}, {"name": "Financial Literacy", "registrations": 0, "sector": "Education", "description": ""}, {"name": "Springs of Wealth", "registrations": 0, "sector": "Others", "description": "A registered non-governmental organization in Uganda focused on agriculture, rural development, and education to help communities build generational wealth"}, {"name": "Commission Agents", "registrations": 0, "sector": "Others", "description": ""}, {"name": "Kulika Uganda-Mubende", "registrations": 0, "sector": "Agriculture", "description": "NGO that promotes  organic agriculture, farmer-to-farmer extension, and market linkages while also administering scholarships and vocational training in agriculture."}, {"name": "Kulika Uganda Ggaba Market", "registrations": 0, "sector": "Agriculture", "description": "NGO that promotes  organic agriculture, farmer-to-farmer extension, and market linkages while also administering scholarships and vocational training in agriculture."}, {"name": "Kulika Uganda-Wakiso", "registrations": 0, "sector": "Agriculture", "description": "NGO that promotes  organic agriculture, farmer-to-farmer extension, and market linkages while also administering scholarships and vocational training in agriculture."}, {"name": "Uganda Boxing Federation", "registrations": 0, "sector": "Sports & Recreation", "description": "Uganda Boxing Federation"}, {"name": "Kulika Uganda-Kyegegwa", "registrations": 0, "sector": "Agriculture", "description": "NGO that promotes  organic agriculture, farmer-to-farmer extension, and market linkages while also administering scholarships and vocational training in agriculture."}, {"name": "Employer Registration", "registrations": 0, "sector": "Others", "description": ""}, {"name": "Kulika Uganda-Luuka", "registrations": 0, "sector": "Agriculture", "description": "NGO that promotes  organic agriculture, farmer-to-farmer extension, and market linkages while also administering scholarships and vocational training in agriculture."}, {"name": "Kulika Uganda-Nakasongola", "registrations": 0, "sector": "Agriculture", "description": "NGO that promotes  organic agriculture, farmer-to-farmer extension, and market linkages while also administering scholarships and vocational training in agriculture."}, {"name": "Seeta Schools", "registrations": 0, "sector": "Education", "description": ""}, {"name": "Kulika Uganda-Kabaramaido", "registrations": 0, "sector": "Agriculture", "description": "NGO that promotes  organic agriculture, farmer-to-farmer extension, and market linkages while also administering scholarships and vocational training in agriculture."}, {"name": "Otuke", "registrations": 0, "sector": "Agriculture", "description": "Subsistance farmers in Otuke"}, {"name": "Drivers Association", "registrations": 0, "sector": "Transport & Mobility", "description": ""}, {"name": "Ministry of Foreign Affairs", "registrations": 0, "sector": "Others", "description": ""}, {"name": "Kulika Uganda-Kalaki", "registrations": 0, "sector": "Agriculture", "description": "NGO that promotes  organic agriculture, farmer-to-farmer extension, and market linkages while also administering scholarships and vocational training in agriculture."}, {"name": "Kulika Uganda-Coffee Farmers Cooperative Kassanda", "registrations": 0, "sector": "Agriculture", "description": "NGO that promotes  organic agriculture, farmer-to-farmer extension, and market linkages while also administering scholarships and vocational training in agriculture."}, {"name": "WENDI DEMO", "registrations": 0, "sector": "Others", "description": ""}, {"name": "Naka", "registrations": 0, "sector": "Others", "description": ""}, {"name": "Spouts Uganda", "registrations": 0, "sector": "Manufacturing", "description": "Prominent social enterprise in Uganda that locally manufactures and distributes affordable, eco-friendly ceramic water filters under the flagship brand name Purifaaya"}, {"name": "Enterprise Uganda", "registrations": 0, "sector": "Others", "description": "Enterprise Uganda is a prominent public-private institutional partnership that serves as the country’s National Business Development Services (BDS) Center of Excellence. Established in 2001 through a joint initiative between the Government of Uganda and the United Nations Development Programme (UNDP), the organization is dedicated to creating competitive, sustainable, and resilient micro, small, and medium enterprises (MSMEs)"}, {"name": "Legacy Hills", "registrations": 0, "sector": "Others", "description": ""}, {"name": "Uganda Chamber Of Energy And Minerals", "registrations": 0, "sector": "Oil & Mining", "description": "The Uganda Chamber of Energy and Minerals (UCEM) is a not-for-profit private sector advocacy organization established in 2010 to promote and advance Uganda's oil, petroleum, mineral, and energy industries."}, {"name": "Oling Dawn Kerjew Humanitarian And Charities Ngo", "registrations": 0, "sector": "Others", "description": "Oling Dawn Kerjew Humanitarian and Charities NGO is a community-focused non-governmental organization based in Uganda that supports local educational and development initiatives."}, {"name": "Uganda National Oil Company", "registrations": 0, "sector": "Oil & Mining", "description": ""}, {"name": "Africa Women Raising", "registrations": 0, "sector": "Others", "description": ""}, {"name": "Diaspora – Kenya", "registrations": 0, "sector": "Diaspora", "description": ""}, {"name": "Destiny Community Development Initiative", "registrations": 0, "sector": "Agriculture", "description": "Destiny Community Development Initiative (DECODI) is a non-governmental organization based in Soroti, in the Eastern Region of Uganda, focused on community empowerment and local development"}, {"name": "Namco", "registrations": 0, "sector": "Agriculture", "description": "Helps farmers market and add value to their produce"}];
+
+/* ============================================================
+   MOCK DATA
+   ============================================================ */
+
+const REGIONS = ["Kampala","Wakiso","Mukono","Jinja","Gulu","Mbarara","Mbale"];
+const HARDSHIP_REGIONS = ["Gulu","Jinja","Mbarara"];
+const RATE = {Trainer: 120000, "Account Manager": 130000};
+
+const initials = (name) => name.split(" ").map(p=>p[0]).slice(0,2).join("");
+
+const STAFF = [
+  {id:"S01", name:"Aisha Nabatanzi", role:"Trainer", strength:"Informal", languages:["Luganda","English"], homeRegion:"Kampala", note:"Strong at market & vendor sensitization", formalRate:55, informalRate:88, trips:14, avgOnboard:9.2, status:"Available"},
+  {id:"S02", name:"Peter Okello", role:"Trainer", strength:"Formal", languages:["English","Acholi"], homeRegion:"Gulu", note:"Best with MDAs and school staff", formalRate:84, informalRate:50, trips:11, avgOnboard:7.5, status:"Available"},
+  {id:"S03", name:"Grace Namutebi", role:"Account Manager", strength:"Both", languages:["Luganda","English"], homeRegion:"Kampala", note:"High closer, adapts to any crowd", formalRate:78, informalRate:80, trips:20, avgOnboard:12.1, status:"Available"},
+  {id:"S04", name:"Sam Lubega", role:"Account Manager", strength:"Informal", languages:["Luganda","English"], homeRegion:"Wakiso", note:"Boda boda & transport sector specialist", formalRate:48, informalRate:82, trips:16, avgOnboard:10.4, status:"Deployed"},
+  {id:"S05", name:"Josephine Achen", role:"Trainer", strength:"Formal", languages:["English","Acholi","Luo"], homeRegion:"Gulu", note:"Confident presenter for civil servants", formalRate:80, informalRate:60, trips:9, avgOnboard:6.8, status:"Available"},
+  {id:"S06", name:"Moses Kato", role:"Account Manager", strength:"Formal", languages:["English","Luganda"], homeRegion:"Mukono", note:"Strong with SACCOs & local government", formalRate:86, informalRate:55, trips:13, avgOnboard:9.9, status:"Available"},
+  {id:"S07", name:"Fatuma Nabirye", role:"Trainer", strength:"Both", languages:["Luganda","Swahili","English"], homeRegion:"Jinja", note:"Trusted in fishing & lakeside communities", formalRate:60, informalRate:79, trips:10, avgOnboard:7.1, status:"Available"},
+  {id:"S08", name:"Brian Ssekandi", role:"Account Manager", strength:"Informal", languages:["Luganda","English"], homeRegion:"Kampala", note:"High energy, thrives at market events", formalRate:45, informalRate:85, trips:18, avgOnboard:11.6, status:"Deployed"},
+  {id:"S09", name:"Diana Auma", role:"Trainer", strength:"Formal", languages:["English","Acholi"], homeRegion:"Gulu", note:"New joiner, currently being mentored", formalRate:62, informalRate:45, trips:3, avgOnboard:3.2, status:"Available"},
+  {id:"S10", name:"Ronald Byaruhanga", role:"Account Manager", strength:"Both", languages:["Luganda","English","Runyankole"], homeRegion:"Mbarara", note:"Versatile, covers the western region", formalRate:70, informalRate:72, trips:12, avgOnboard:8.9, status:"Available"},
+];
+
+const PARTNERS = [
+  {id:"P01", name:"Boda Boda Union — Kisenyi", region:"Kampala", sector:"Informal", contact:"Hassan Mugisha", phone:"0772 114 552", officerId:"S04", outreaches:5, attendees:620, onboarded:187, spend:2400000},
+  {id:"P02", name:"Nakasero Market Vendors Assoc.", region:"Kampala", sector:"Informal", contact:"Sarah Nakato", phone:"0781 220 918", officerId:"S01", outreaches:3, attendees:340, onboarded:61, spend:1650000},
+  {id:"P03", name:"St. Mary's Teachers SACCO", region:"Wakiso", sector:"Formal", contact:"Robert Ssebunya", phone:"0700 445 210", officerId:"S06", outreaches:2, attendees:90, onboarded:58, spend:780000},
+  {id:"P04", name:"Mukono District Local Government", region:"Mukono", sector:"Formal", contact:"Immaculate Nabatanzi", phone:"0752 663 401", officerId:"S03", outreaches:2, attendees:150, onboarded:41, spend:1020000},
+  {id:"P05", name:"Jinja Fishing Community Cooperative", region:"Jinja", sector:"Informal", contact:"Wilson Wanyama", phone:"0783 902 774", officerId:"S07", outreaches:3, attendees:210, onboarded:33, spend:1890000},
+  {id:"P06", name:"Gulu Boda Boda & Traders Alliance", region:"Gulu", sector:"Informal", contact:"Christine Aol", phone:"0774 558 330", officerId:"S02", outreaches:1, attendees:95, onboarded:12, spend:1150000},
+];
+
+const initialPipeline = [
+  {id:"L01", name:"Kalerwe Produce Traders Association", region:"Kampala", officerId:"S08", contact:"Fred Musoke", phone:"0701 992 331", stage:"MOU Signed", targetAudience:450, identifiedDate:"2026-06-18"},
+  {id:"L02", name:"Mbarara Taxi Operators Coop", region:"Mbarara", officerId:"S10", contact:"Dennis Tumusiime", phone:"0775 882 119", stage:"Vetted & Contacted", targetAudience:320, identifiedDate:"2026-07-02"},
+  {id:"L03", name:"Mbale Coffee Farmers Federation", region:"Mbale", officerId:"S03", contact:"Patrick Wambede", phone:"0782 334 001", stage:"Identified", targetAudience:600, identifiedDate:"2026-07-14"},
+];
+
+const PIPELINE_STAGES = ["Identified","Vetted & Contacted","MOU Signed"];
+
+const initialOutreaches = [
+  {id:"OUT-013", title:"Extended Roadshow — Kisenyi & Nakawa Stages", partnerId:"P01", region:"Kampala", town:"Kisenyi & Nakawa", sector:"Informal", languages:["Luganda"], date:"2026-07-16", days:2, expectedAudience:140, status:"Approved", assigned:["S08","S04"], perDiemStatus:"Approved", results:null, need:"Two-stage boda roadshow — planned as a 2-day trip"},
+  {id:"OUT-014", title:"Kisenyi Sensitization & Onboarding Drive", partnerId:"P01", region:"Kampala", town:"Kisenyi", sector:"Informal", languages:["Luganda"], date:"2026-07-24", days:1, expectedAudience:180, status:"Pending Approval", assigned:["S01","S08","S04"], perDiemStatus:"Pending Accounting", results:null, need:"Sensitization + onboarding at Saturday union meeting point"},
+  {id:"OUT-015", title:"St. Mary's Teachers Staff Enrollment Session", partnerId:"P03", region:"Wakiso", town:"Kira", sector:"Formal", languages:["English"], date:"2026-07-22", days:1, expectedAudience:60, status:"Approved", assigned:["S06","S02"], perDiemStatus:"Approved", results:null, need:"Onboarding-focused, staffroom presentation after school hours"},
+  {id:"OUT-016", title:"Mukono MDA Sensitization Week", partnerId:"P04", region:"Mukono", town:"Mukono Town", sector:"Formal", languages:["English","Luganda"], date:"2026-07-28", days:3, expectedAudience:220, status:"Draft", assigned:[], perDiemStatus:"Not submitted", results:null, need:"Multi-day district office sensitization ahead of enrollment push"},
+  {id:"OUT-017", title:"Nakasero Market Onboarding Follow-up", partnerId:"P02", region:"Kampala", town:"Nakasero", sector:"Informal", languages:["Luganda"], date:"2026-07-19", days:1, expectedAudience:150, status:"Completed", assigned:["S08","S04","S01"], perDiemStatus:"Disbursed", results:{attendees:138, onboarded:34, spend:620000}, need:"Follow-up onboarding for vendors sensitized in June"},
+  {id:"OUT-018", title:"Lakeside Savings Drive", partnerId:"P05", region:"Jinja", town:"Walukuba", sector:"Informal", languages:["Luganda","Swahili"], date:"2026-08-03", days:2, expectedAudience:130, status:"Pending Approval", assigned:["S07"], perDiemStatus:"Pending Accounting", results:null, need:"Two landing sites, morning sessions before fishers go out"},
+  {id:"OUT-019", title:"Gulu Traders Re-engagement Outreach", partnerId:"P06", region:"Gulu", town:"Gulu Town", sector:"Informal", languages:["Acholi","English"], date:"2026-08-06", days:1, expectedAudience:100, status:"Draft", assigned:[], perDiemStatus:"Not submitted", results:null, need:"Partner underperformed last visit (12/95) — re-engage cautiously"},
+];
+
+const TODAY = new Date("2026-07-21");
+
+/* ============================================================
+   ENGINE — sizing + fit-matching + per diem
+   ============================================================ */
+
+function recommendTeam(expectedAudience){
+  const total = Math.max(2, Math.ceil(expectedAudience / 65));
+  const trainers = Math.max(1, Math.round(total * 0.45));
+  const managers = Math.max(1, total - trainers);
+  return {trainers, managers, total: trainers+managers};
+}
+
+function fitScore(person, outreach){
+  let score = 0;
+  const sectorRate = outreach.sector === "Formal" ? person.formalRate : person.informalRate;
+  score += sectorRate * 0.5;
+  if(outreach.languages.some(l=>person.languages.includes(l))) score += 20;
+  if(person.homeRegion === outreach.region) score += 20; else if(!HARDSHIP_REGIONS.includes(outreach.region)) score += 8;
+  if(person.status === "Available") score += 10;
+  return Math.round(score);
+}
+
+function fitLabel(score){
+  if(score>=80) return {label:"Best match", cls:"badge-best"};
+  if(score>=60) return {label:"Good fit", cls:"badge-good"};
+  return {label:"Consider", cls:"badge-consider"};
+}
+
+function perDiemForPerson(person, outreach){
+  let daily = RATE[person.role];
+  if(HARDSHIP_REGIONS.includes(outreach.region)) daily += 30000;
+  return daily * outreach.days;
+}
+
+function totalPerDiem(outreach, staffList){
+  return outreach.assigned.reduce((sum,id)=>{
+    const p = staffList.find(s=>s.id===id);
+    return p ? sum + perDiemForPerson(p, outreach) : sum;
+  },0);
+}
+
+function daysUntil(dateStr){
+  const d = new Date(dateStr);
+  return Math.round((d - TODAY)/(1000*60*60*24));
+}
+
+function fieldTimeInfo(outreach){
+  const start = new Date(outreach.date);
+  const plannedEnd = new Date(start.getTime() + (outreach.days-1)*86400000);
+  const daysElapsed = Math.floor((TODAY-start)/86400000) + 1;
+  const daysOver = Math.floor((TODAY-plannedEnd)/86400000);
+  const isActive = outreach.status !== "Completed" && TODAY >= start && daysElapsed <= (outreach.days + 10);
+  return {start, plannedEnd, daysElapsed, daysOver, isActive, overstaying: isActive && daysOver > 0};
+}
+
+function getFieldEntries(outreaches, staff){
+  const entries = [];
+  outreaches.forEach(o=>{
+    const info = fieldTimeInfo(o);
+    if(!info.isActive) return;
+    o.assigned.forEach(sid=>{
+      const person = staff.find(s=>s.id===sid);
+      if(person) entries.push({person, outreach:o, ...info});
+    });
+  });
+  return entries;
+}
+
+function fmtUGX(n){
+  return "UGX " + n.toLocaleString("en-US");
+}
+function fmtDate(dateStr){
+  return new Date(dateStr).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"});
+}
+
+function partnerName(outreach, partners){
+  const partner = partners.find(p=>p.id===outreach.partnerId);
+  if(partner) return partner.name;
+  if(outreach.customPartner) return outreach.customPartner;
+  return "Unlisted partner / area";
+}
+
+function getTeamTarget(outreach){
+  const rec = recommendTeam(outreach.expectedAudience);
+  const trainers = (outreach.overrideTrainers!==undefined && outreach.overrideTrainers!==null && outreach.overrideTrainers!=="") ? Number(outreach.overrideTrainers) : rec.trainers;
+  const managers = (outreach.overrideManagers!==undefined && outreach.overrideManagers!==null && outreach.overrideManagers!=="") ? Number(outreach.overrideManagers) : rec.managers;
+  return {trainers, managers, total: trainers+managers, isOverridden: (outreach.overrideTrainers!==undefined && outreach.overrideTrainers!==null && outreach.overrideTrainers!=="") || (outreach.overrideManagers!==undefined && outreach.overrideManagers!==null && outreach.overrideManagers!=="")};
+}
+
+function genOutreachId(outreaches){
+  const nums = outreaches.map(o=>parseInt((o.id.split("-")[1])||"0",10)).filter(n=>!isNaN(n));
+  const max = nums.length ? Math.max(...nums) : 0;
+  return "OUT-"+String(max+1).padStart(3,"0");
+}
+
+const LANGUAGE_OPTIONS = ["Luganda","English","Acholi","Swahili","Runyankole","Luo"];
+
+function statusPill(status){
+  const map = {
+    "Draft":"draft", "Pending Approval":"pending", "Approved":"approved", "Completed":"completed"
+  };
+  return <span className={"pill "+map[status]}><span className="pill-dot"></span>{status}</span>;
+}
+
+function fieldTimeStamp(entry){
+  if(entry.overstaying) return <span className="stamp no">Overstaying · {entry.daysOver}d over plan</span>;
+  if(entry.daysElapsed >= entry.outreach.days) return <span className="stamp wait">On final planned day</span>;
+  return <span className="stamp ok">On track</span>;
+}
+
+function perDiemStamp(pdStatus, urgent){
+  if(pdStatus==="Approved" || pdStatus==="Disbursed")
+    return <span className="stamp ok">{pdStatus==="Disbursed" ? "Disbursed" : "Approved"}</span>;
+  if(pdStatus==="Pending Accounting")
+    return <span className={"stamp "+(urgent?"no":"wait")}>{urgent ? "Unapproved · Urgent" : "Pending"}</span>;
+  return <span className="stamp wait" style={{opacity:0.55}}>Not submitted</span>;
+}
+
+/* ============================================================
+   SHARED BITS
+   ============================================================ */
+
+function Avatar({name}){
+  return <span className="avatar">{initials(name)}</span>;
+}
+
+function KPI({num, lbl, delta, deltaDir}){
+  return (
+    <div className="card kpi">
+      <div className="num">{num}</div>
+      <div className="lbl">{lbl}</div>
+      {delta && <div className={"delta "+(deltaDir==="up"?"up":"down")}>{delta}</div>}
+    </div>
+  );
+}
+
+/* ============================================================
+   DASHBOARD
+   ============================================================ */
+
+function SeniorDashboard({outreaches, staff, partners, goTo}){
+  const pending = outreaches.filter(o=>o.status==="Pending Approval");
+  const urgentPerDiem = outreaches.filter(o=> (o.perDiemStatus==="Pending Accounting") && daysUntil(o.date) <= 3 && daysUntil(o.date) >= 0);
+  const completed = outreaches.filter(o=>o.status==="Completed");
+  const totalOnboardedMonth = completed.reduce((s,o)=>s+(o.results?.onboarded||0),0);
+  const deployedCount = staff.filter(s=>s.status==="Deployed").length;
+  const scoredPartners = partners.filter(p=>p.attendees>0);
+  const worstPartner = scoredPartners.length ? [...scoredPartners].sort((a,b)=>(a.onboarded/a.attendees)-(b.onboarded/b.attendees))[0] : null;
+  const fieldEntries = getFieldEntries(outreaches, staff);
+  const overstaying = fieldEntries.filter(e=>e.overstaying);
+
+  return (
+    <div>
+      <div className="grid cols-4">
+        <KPI num={pending.length} lbl="Outreach plans awaiting approval" />
+        <KPI num={urgentPerDiem.length} lbl="Per diem unapproved, trip < 3 days out" deltaDir="down" delta={urgentPerDiem.length>0 ? "needs Accounting sign-off now" : ""} />
+        <KPI num={overstaying.length} lbl="Staff overstaying in the field vs. plan" deltaDir="down" delta={overstaying.length>0 ? "review before next per diem run" : ""} />
+        <KPI num={staff.length - deployedCount} lbl="Staff available to deploy today" />
+      </div>
+
+      {urgentPerDiem.length>0 &&
+        <div className="callout warn" style={{marginTop:22}}>
+          <strong>{urgentPerDiem.length} trip(s)</strong> depart within 3 days with per diem still <strong>unapproved</strong> — sign off now so staff aren't fronting their own money. See Per Diem tab.
+        </div>
+      }
+      {overstaying.length>0 &&
+        <div className="callout warn">
+          <strong>{overstaying.length} staff member(s)</strong> are still logged in the field beyond the outreach's planned duration. See Per Diem tab → Field Time Tracker.
+        </div>
+      }
+
+      <div className="section-head">
+        <h2>Awaiting your approval</h2>
+        <span className="hint">{pending.length} outreach plan(s)</span>
+      </div>
+      {pending.length===0 ? <div className="empty">Nothing waiting on you right now.</div> :
+      <div className="card" style={{padding:0}}>
+        <table>
+          <thead><tr><th>Outreach</th><th>Region</th><th>Date</th><th>Team</th><th>Per diem</th><th></th></tr></thead>
+          <tbody>
+            {pending.map(o=>{
+              const urgent = o.perDiemStatus==="Pending Accounting" && daysUntil(o.date)<=3 && daysUntil(o.date)>=0;
+              return (
+                <tr key={o.id}>
+                  <td><strong>{o.title}</strong><br/><span className="muted" style={{fontSize:12}}>{partnerName(o, partners)}</span></td>
+                  <td>{o.region}</td>
+                  <td className="mono">{fmtDate(o.date)}</td>
+                  <td>{o.assigned.length} assigned</td>
+                  <td>{perDiemStamp(o.perDiemStatus, urgent)}</td>
+                  <td><button className="btn btn-ghost btn-sm" onClick={()=>goTo("plan", o.id)}>Review →</button></td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>}
+
+      <div className="section-head">
+        <h2>Partner performance flag</h2>
+        <span className="hint">lowest conversion this quarter</span>
+      </div>
+      {worstPartner ? (
+      <div className="card">
+        <div className="row-flex" style={{justifyContent:"space-between"}}>
+          <div>
+            <strong>{worstPartner.name}</strong>
+            <div className="muted" style={{fontSize:12.5, marginTop:3}}>
+              {worstPartner.onboarded} onboarded from {worstPartner.attendees} attendees across {worstPartner.outreaches} outreach(es) — {Math.round(worstPartner.onboarded/worstPartner.attendees*100)}% conversion.
+            </div>
+          </div>
+          <button className="btn btn-ghost btn-sm" onClick={()=>goTo("partners")}>View registry →</button>
+        </div>
+      </div>
+      ) : <div className="empty">No results logged yet.</div>}
+    </div>
+  );
+}
+
+function FieldDashboard({me, outreaches, staff}){
+  if(!me) return <div className="empty">Pick who you are in the left sidebar to see your assignments.</div>;
+  const mine = outreaches.filter(o=>o.assigned.includes(me.id)).sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const upcoming = mine.filter(o=>o.status!=="Completed");
+  const myFieldEntry = getFieldEntries(outreaches, staff).find(e=>e.person.id===me.id);
+
+  const approvedCount = upcoming.filter(o=>o.perDiemStatus==="Approved" || o.perDiemStatus==="Disbursed").length;
+  const pendingCount = upcoming.filter(o=>o.perDiemStatus==="Pending Accounting").length;
+  const urgentCount = upcoming.filter(o=>o.perDiemStatus==="Pending Accounting" && daysUntil(o.date)<=3 && daysUntil(o.date)>=0).length;
+
+  return (
+    <div>
+      <div className="callout">
+        Welcome, {me.name.split(" ")[0]} — {me.role} based in {me.homeRegion}. {me.note}
+      </div>
+
+      <div className="section-head" style={{marginTop:0}}><h2>Your per diem status</h2></div>
+      <div className="perdiem-banner">
+        <div className={"seg "+(approvedCount>0?"ok":"")}>
+          <div className="n">{approvedCount}</div>
+          <div className="l">Approved trip(s)</div>
+        </div>
+        <div className={"seg "+(pendingCount>0?"wait":"")}>
+          <div className="n">{pendingCount}</div>
+          <div className="l">Awaiting Accounting</div>
+        </div>
+        <div className={"seg "+(urgentCount>0?"warn":"")}>
+          <div className="n">{urgentCount}</div>
+          <div className="l">Urgent — trip within 3 days, unapproved</div>
+        </div>
+      </div>
+
+      {myFieldEntry &&
+        <div className={"callout "+(myFieldEntry.overstaying?"warn":"")}>
+          You're currently logged in the field on <strong>{myFieldEntry.outreach.title}</strong> — day {myFieldEntry.daysElapsed} of a planned {myFieldEntry.outreach.days}. {fieldTimeStamp(myFieldEntry)}
+        </div>
+      }
+
+      <div className="section-head"><h2>Your upcoming deployments</h2></div>
+      {upcoming.length===0 ? <div className="empty">No outreach assigned to you right now.</div> :
+      <div className="grid cols-2">
+        {upcoming.map(o=>{
+          const urgent = o.perDiemStatus==="Pending Accounting" && daysUntil(o.date)<=3 && daysUntil(o.date)>=0;
+          return (
+            <div className="card" key={o.id}>
+              <div className="row-flex" style={{justifyContent:"space-between", marginBottom:10}}>
+                {statusPill(o.status)}
+                {perDiemStamp(o.perDiemStatus, urgent)}
+              </div>
+              <strong>{o.title}</strong>
+              <div className="muted" style={{fontSize:12.5, margin:"6px 0 10px"}}>{o.town}, {o.region} · {fmtDate(o.date)} · {o.days} day(s)</div>
+              {urgent && <div style={{fontSize:12, color:"var(--red)", marginTop:8}}>Departs in {daysUntil(o.date)} day(s) — per diem not yet approved by Accounting.</div>}
+            </div>
+          );
+        })}
+      </div>}
+
+      <div className="section-head"><h2>Your activity</h2></div>
+      <div className="grid cols-2">
+        <KPI num={me.trips} lbl="Outreach trips completed" />
+        <div className="card" style={{padding:14}}>
+          <div className="muted" style={{fontSize:11}}>SECTOR STRENGTH</div>
+          <div style={{fontSize:16, fontWeight:600, marginTop:4}}><span className="tag">{me.strength}</span></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   PARTNERS
+   ============================================================ */
+
+function PartnersView({partners, setPartners, pipeline, setPipeline, staff, role}){
+  const [subTab, setSubTab] = useState("active");
+  const [showIdentify, setShowIdentify] = useState(false);
+  const [resultsFor, setResultsFor] = useState(null);
+
+  const officerName = (id) => staff.find(s=>s.id===id)?.name || "Unassigned";
+  const officerObj = (id) => staff.find(s=>s.id===id);
+
+  const ranked = [...partners].sort((a,b)=>(b.onboarded/b.attendees)-(a.onboarded/a.attendees));
+
+  const recordResults = (partnerId, attendeesAdded, onboardedAdded) => {
+    setPartners(prev => prev.map(p => p.id===partnerId ? {
+      ...p,
+      attendees: p.attendees + attendeesAdded,
+      onboarded: p.onboarded + onboardedAdded,
+      outreaches: p.outreaches + 1,
+    } : p));
+    setResultsFor(null);
+  };
+
+  const advanceStage = (leadId) => {
+    setPipeline(prev => prev.map(l=>{
+      if(l.id!==leadId) return l;
+      const idx = PIPELINE_STAGES.indexOf(l.stage);
+      const next = PIPELINE_STAGES[Math.min(idx+1, PIPELINE_STAGES.length-1)];
+      return {...l, stage: next};
+    }));
+  };
+
+  const activateLead = (leadId) => {
+    const lead = pipeline.find(l=>l.id===leadId);
+    if(!lead) return;
+    const newId = "P" + String(partners.length+1).padStart(2,"0") + "-" + leadId;
+    setPartners(prev => [...prev, {
+      id:newId, name:lead.name, region:lead.region, 
+      sector:lead.sector || "Informal", 
+      subcategory: lead.subcategory,
+      orgSize: lead.orgSize,
+      accountOwner: lead.accountOwner,
+      earningCycle: lead.earningCycle,
+      additionalInfo: lead.additionalInfo,
+      contact:lead.contact, phone:lead.phone,
+      officerId:lead.officerId, outreaches:0, attendees:0, onboarded:0, spend:0,
+    }]);
+    setPipeline(prev => prev.filter(l=>l.id!==leadId));
+    setSubTab("active");
+  };
+
+
+  const identifyPartner = (draft) => {
+    const newId = "L" + String(pipeline.length+1).padStart(2,"0");
+    setPipeline(prev => [...prev, {
+      id:newId, name:draft.name, region:draft.region, officerId:draft.officerId,
+      contact:draft.contact, phone:draft.phone, stage:"Identified",
+      targetAudience:draft.targetAudience, identifiedDate:"2026-07-21",
+      sector: draft.sector, subcategory: draft.subcategory,
+      orgSize: draft.orgSize, accountOwner: draft.accountOwner,
+      earningCycle: draft.earningCycle, additionalInfo: draft.additionalInfo
+    }]);
+    setShowIdentify(false);
+    setSubTab("pipeline");
+  };
+
+
+  const officerStats = staff.map(s=>{
+    const activePartners = partners.filter(p=>p.officerId===s.id);
+    const pipelineLeads = pipeline.filter(l=>l.officerId===s.id);
+    const outreachesRun = activePartners.reduce((sum,p)=>sum+p.outreaches,0);
+    const totalOnboarded = activePartners.reduce((sum,p)=>sum+p.onboarded,0);
+    return {staff:s, partnersSourced: activePartners.length + pipelineLeads.length, outreachesRun, totalOnboarded};
+  }).filter(o=>o.partnersSourced>0)
+    .sort((a,b)=> b.partnersSourced-a.partnersSourced || b.totalOnboarded-a.totalOnboarded);
+
+  return (
+    <div>
+      <div className="callout">
+        Partner identification drives voluntary savings onboarding — this module tracks active partners, prospective pipeline leads, and officer sourcing effectiveness.
+      </div>
+
+      <div className="row-flex" style={{justifyContent:"space-between", marginBottom:22, flexWrap:"wrap", gap:10}}>
+        <div className="row-flex" style={{gap:8}}>
+          <button className={"btn btn-sm "+(subTab==="active"?"btn-gold":"btn-ghost")} onClick={()=>setSubTab("active")}>Active Registry ({partners.length})</button>
+          <button className={"btn btn-sm "+(subTab==="pipeline"?"btn-gold":"btn-ghost")} onClick={()=>setSubTab("pipeline")}>Sourcing Pipeline ({pipeline.length})</button>
+          <button className={"btn btn-sm "+(subTab==="officers"?"btn-gold":"btn-ghost")} onClick={()=>setSubTab("officers")}>Officer Sourcing</button>
+        </div>
+        <button className="btn btn-primary" onClick={()=>setShowIdentify(true)}>+ Identify New Partner</button>
+      </div>
+
+      {subTab==="active" && (
+        <>
+          <div className="section-head" style={{marginTop:0}}>
+            <h2>Active Partner Registry</h2>
+            <span className="hint">ranked by onboarding conversion rate</span>
+          </div>
+          <div className="card" style={{padding:0}}>
+            <table>
+              <thead><tr><th style={{width:28}}>#</th><th>Partner</th><th>Region</th><th>Sector</th><th>Lead Initiator</th><th>Attendees</th><th>Onboarded</th><th>Conversion</th>{role==="senior" && <th></th>}</tr></thead>
+              <tbody>
+                {ranked.map((p,i)=>{
+                  const conv = p.attendees>0 ? Math.round(p.onboarded/p.attendees*100) : 0;
+                  const low = conv < 25;
+                  return (
+                    <tr key={p.id}>
+                      <td className="ledger-idx">{String(i+1).padStart(2,"0")}</td>
+                      <td><strong>{p.name}</strong><div className="muted" style={{fontSize:11.5}}>{p.outreaches} outreach(es) completed</div></td>
+                      <td>{p.region}</td>
+                      <td><span className="tag">{p.sector}</span></td>
+                      <td className="muted" style={{fontSize:12.5}}>{officerName(p.officerId)}</td>
+                      <td className="mono">{p.attendees}</td>
+                      <td className="mono">{p.onboarded}</td>
+                      <td>
+                        {p.attendees>0
+                          ? <span className={"pill "+(low?"urgent":"approved")}><span className="pill-dot"></span>{conv}%</span>
+                          : <span className="pill draft"><span className="pill-dot"></span>No data yet</span>}
+                      </td>
+                      {role==="senior" && <td><button className="btn btn-ghost btn-sm" onClick={()=>setResultsFor(p.id)}>Record results</button></td>}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+
+      {subTab==="pipeline" && (
+        <>
+          <div className="section-head" style={{marginTop:0}}>
+            <h2>Partner Sourcing Pipeline</h2>
+            <span className="hint">un-outreached partner prospects</span>
+          </div>
+          {pipeline.length===0 ? <div className="empty">No leads in the pipeline right now.</div> :
+          <div className="card" style={{padding:0}}>
+            <table>
+              <thead><tr><th style={{width:28}}>#</th><th>Partner Lead</th><th>Region</th><th>Lead Initiator</th><th>Pipeline Stage</th><th>Target Audience</th><th>Identified Date</th>{role==="senior" && <th></th>}</tr></thead>
+              <tbody>
+                {pipeline.map((l,i)=>(
+                  <tr key={l.id}>
+                    <td className="ledger-idx">{String(i+1).padStart(2,"0")}</td>
+                    <td><strong>{l.name}</strong><div className="muted" style={{fontSize:11.5}}>{l.contact} · {l.phone}</div></td>
+                    <td>{l.region}</td>
+                    <td className="muted" style={{fontSize:12.5}}>{officerName(l.officerId)}</td>
+                    <td><span className="pill pending"><span className="pill-dot"></span>{l.stage}</span></td>
+                    <td className="mono">{l.targetAudience}</td>
+                    <td className="mono">{fmtDate(l.identifiedDate)}</td>
+                    {role==="senior" && (
+                      <td>
+                        {l.stage!=="MOU Signed"
+                          ? <button className="btn btn-ghost btn-sm" onClick={()=>advanceStage(l.id)}>Advance →</button>
+                          : <button className="btn btn-gold btn-sm" onClick={()=>activateLead(l.id)}>Activate as Partner</button>}
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>}
+        </>
+      )}
+
+      {subTab==="officers" && (
+        <>
+          <div className="section-head" style={{marginTop:0}}>
+            <h2>Officer Partner Identification Leaderboard</h2>
+            <span className="hint">measured on partners identified &amp; onboarding outcomes</span>
+          </div>
+          {officerStats.length===0 ? <div className="empty">No partners have been attributed to an officer yet.</div> :
+          <div className="card" style={{padding:0}}>
+            <table>
+              <thead><tr><th style={{width:28}}>#</th><th>Officer</th><th>Role</th><th>Partners Sourced</th><th>Outreaches Run</th><th>Total Members Onboarded</th></tr></thead>
+              <tbody>
+                {officerStats.map((o,i)=>(
+                  <tr key={o.staff.id}>
+                    <td className="ledger-idx">{String(i+1).padStart(2,"0")}</td>
+                    <td><div className="row-flex"><Avatar name={o.staff.name}/> <strong>{o.staff.name}</strong></div></td>
+                    <td><span className="tag">{o.staff.role}</span></td>
+                    <td className="mono">{o.partnersSourced} partner(s)</td>
+                    <td className="mono">{o.outreachesRun}</td>
+                    <td className="mono" style={{color:"var(--forest-3)", fontWeight:600}}>{o.totalOnboarded} members</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>}
+        </>
+      )}
+
+      {showIdentify && (
+        <IdentifyPartnerModal staff={staff} onClose={()=>setShowIdentify(false)} onCreate={identifyPartner}/>
+      )}
+      {resultsFor && (
+        <RecordResultsModal
+          partner={partners.find(p=>p.id===resultsFor)}
+          onClose={()=>setResultsFor(null)}
+          onSave={(att,ob)=>recordResults(resultsFor, att, ob)}
+        />
+      )}
+    </div>
+  );
+}
+
+function IdentifyPartnerModal({staff, onClose, onCreate}){
+  const [name, setName] = useState("");
+  const [region, setRegion] = useState(REGIONS[0]);
+  const [customRegion, setCustomRegion] = useState("");
+  const [contact, setContact] = useState("");
+  const [phone, setPhone] = useState("");
+  const [officerId, setOfficerId] = useState(staff[0]?.id || "");
+  const [targetAudience, setTargetAudience] = useState(100);
+
+  const [sector, setSector] = useState("Informal");
+  const [formalSubcategory, setFormalSubcategory] = useState("MDA-Ministries/ Departments & Agencies");
+  const [informalSubcategory, setInformalSubcategory] = useState("Saloonists");
+  const [orgSize, setOrgSize] = useState("");
+  const [accountOwner, setAccountOwner] = useState("");
+  const [earningCycle, setEarningCycle] = useState("Monthly");
+  const [additionalInfo, setAdditionalInfo] = useState("");
+
+  const resolvedRegion = region==="Other" ? customRegion.trim() : region;
+  const canSubmit = name.trim() && contact.trim() && officerId && resolvedRegion;
+  const accountManagers = staff.filter(s => s.role === "Account Manager");
+
+  const handleSubmit = () => {
+    onCreate({ 
+      name: name.trim(), 
+      region: resolvedRegion, 
+      contact: contact.trim(), 
+      phone: phone.trim(), 
+      officerId, 
+      targetAudience,
+      sector,
+      subcategory: sector === "Formal" ? formalSubcategory : informalSubcategory,
+      orgSize: orgSize.trim(),
+      accountOwner,
+      earningCycle,
+      additionalInfo: additionalInfo.trim()
+    });
+  };
+
+  return (
+    <div className="modal-back" onClick={(e)=>{if(e.target===e.currentTarget) onClose();}}>
+      <div className="modal">
+        <div className="modal-head">
+          <div>
+            <h3 style={{margin:"0 0 4px"}}>Identify a new partner</h3>
+            <div className="muted" style={{fontSize:12.5}}>Logs a fresh lead into the Sourcing Pipeline — it becomes an Active Partner once it\'s been outreached.</div>
+          </div>
+          <button className="x-close" onClick={onClose}>×</button>
+        </div>
+        <div className="field">
+          <label>Partner / lead name</label>
+          <input value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. Owino Market Traders Association" />
+        </div>
+        <div className="grid cols-2">
+          <div className="field">
+            <label>Region</label>
+            <select value={region} onChange={e=>setRegion(e.target.value)}>
+              {REGIONS.map(r=><option key={r}>{r}</option>)}
+              <option value="Other">Other (type below)</option>
+            </select>
+            {region==="Other" && (
+              <div className="other-field">
+                <input value={customRegion} onChange={e=>setCustomRegion(e.target.value)} placeholder="Enter the region name" />
+              </div>
+            )}
+          </div>
+          <div className="field">
+            <label>Target audience (est.)</label>
+            <input type="number" min="1" value={targetAudience} onChange={e=>setTargetAudience(Number(e.target.value)||0)} />
+          </div>
+        </div>
+        <div className="grid cols-2">
+          <div className="field">
+            <label>Contact person</label>
+            <input value={contact} onChange={e=>setContact(e.target.value)} placeholder="Full name" />
+          </div>
+          <div className="field">
+            <label>Contact phone</label>
+            <input value={phone} onChange={e=>setPhone(e.target.value)} placeholder="07XX XXX XXX" />
+          </div>
+        </div>
+        <div className="field">
+          <label>Lead Initiator</label>
+          <select value={officerId} onChange={e=>setOfficerId(e.target.value)}>
+            {staff.map(s=><option key={s.id} value={s.id}>{s.name} — {s.role}</option>)}
+          </select>
+        </div>
+
+        <div className="section-head" style={{ marginTop: 20, marginBottom: 10 }}>
+          <h2 style={{ fontSize: 15 }}>Needs Assessment</h2>
+        </div>
+        <div className="grid cols-2">
+          <div className="field">
+            <label>Partner Sector</label>
+            <select value={sector} onChange={(e) => setSector(e.target.value)}>
+              <option value="Informal">Informal</option>
+              <option value="Formal">Formal</option>
+            </select>
+          </div>
+          <div className="field">
+            <label>Sector Category</label>
+            {sector === "Formal" ? (
+              <select value={formalSubcategory} onChange={(e) => setFormalSubcategory(e.target.value)}>
+                <option value="MDA-Ministries/ Departments & Agencies">MDA-Ministries/ Departments & Agencies</option>
+                <option value="Mass Markets">Mass Markets</option>
+              </select>
+            ) : (
+              <select value={informalSubcategory} onChange={(e) => setInformalSubcategory(e.target.value)}>
+                <option value="Saloonists">Saloonists</option>
+                <option value="Farmers">Farmers</option>
+                <option value="Agriculture">Agriculture</option>
+                <option value="Industry">Industry</option>
+                <option value="Transportation">Transportation</option>
+                <option value="Healthcare">Healthcare</option>
+                <option value="Other">Other Livelihoods</option>
+              </select>
+            )}
+          </div>
+        </div>
+
+        <div className="grid cols-2">
+          <div className="field">
+            <label>Partner Organisational Size</label>
+            <input value={orgSize} onChange={(e) => setOrgSize(e.target.value)} placeholder="e.g. 50-100" />
+          </div>
+          <div className="field">
+            <label>Earning cycle category</label>
+            <select value={earningCycle} onChange={(e) => setEarningCycle(e.target.value)}>
+              <option value="Daily">Daily</option>
+              <option value="Weekly">Weekly</option>
+              <option value="Monthly">Monthly</option>
+              <option value="Seasonal">Seasonal</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="field">
+          <label>Account owner (Assigned Relationship Manager)</label>
+          <select value={accountOwner} onChange={(e) => setAccountOwner(e.target.value)}>
+            <option value="">-- Select Account Manager --</option>
+            {accountManagers.map((s) => <option key={s.id} value={s.id}>{s.name} — {s.role}</option>)}
+          </select>
+        </div>
+
+        <div className="field">
+          <label>Additional information (Partner Specific Need)</label>
+          <textarea rows="3" value={additionalInfo} onChange={(e) => setAdditionalInfo(e.target.value)} placeholder="e.g. Training smartlife flexi etc" />
+        </div>
+
+        <div className="divider"></div>
+        <div className="row-flex" style={{justifyContent:"flex-end", gap:10}}>
+          <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
+          <button className="btn btn-primary" disabled={!canSubmit} onClick={handleSubmit}>Add to pipeline</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RecordResultsModal({partner, onClose, onSave}){
+  const [attendees, setAttendees] = useState("");
+  const [onboarded, setOnboarded] = useState("");
+  const canSubmit = attendees!=="" && onboarded!=="" && Number(onboarded)<=Number(attendees);
+
+  return (
+    <div className="modal-back" onClick={(e)=>{if(e.target===e.currentTarget) onClose();}}>
+      <div className="modal">
+        <div className="modal-head">
+          <div>
+            <h3 style={{margin:"0 0 4px"}}>Record outreach results</h3>
+            <div className="muted" style={{fontSize:12.5}}>{partner?.name} — this adds to their running total and updates conversion automatically.</div>
+          </div>
+          <button className="x-close" onClick={onClose}>×</button>
+        </div>
+        <div className="grid cols-2">
+          <div className="field">
+            <label>Attendees at this outreach</label>
+            <input type="number" min="0" value={attendees} onChange={e=>setAttendees(e.target.value)} />
+          </div>
+          <div className="field">
+            <label>Members onboarded</label>
+            <input type="number" min="0" value={onboarded} onChange={e=>setOnboarded(e.target.value)} />
+          </div>
+        </div>
+        {Number(onboarded) > Number(attendees) && attendees!=="" &&
+          <div className="callout warn">Onboarded can't exceed attendees.</div>}
+        <div className="divider"></div>
+        <div className="row-flex" style={{justifyContent:"flex-end", gap:10}}>
+          <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
+          <button className="btn btn-primary" disabled={!canSubmit} onClick={()=>onSave(Number(attendees), Number(onboarded))}>Save results</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   PLAN OUTREACH (sizing + fit-matching engine)
+   ============================================================ */
+
+function PlanOutreach({outreaches, setOutreaches, staff, partners, role, openId, setOpenId}){
+  const [showCreate, setShowCreate] = useState(false);
+  const open = outreaches.find(o=>o.id===openId) || null;
+
+  const toggleAssign = (outreachId, staffId) => {
+    setOutreaches(prev => prev.map(o=>{
+      if(o.id!==outreachId) return o;
+      const has = o.assigned.includes(staffId);
+      return {...o, assigned: has ? o.assigned.filter(x=>x!==staffId) : [...o.assigned, staffId]};
+    }));
+  };
+
+  const submitForApproval = (id) => {
+    setOutreaches(prev => prev.map(o => o.id===id ? {...o, status:"Pending Approval", perDiemStatus: o.perDiemStatus==="Not submitted" ? "Pending Accounting" : o.perDiemStatus} : o));
+  };
+  const approve = (id) => {
+    setOutreaches(prev => prev.map(o => o.id===id ? {...o, status:"Approved"} : o));
+  };
+  const approvePerDiem = (id) => {
+    setOutreaches(prev => prev.map(o => o.id===id ? {...o, perDiemStatus:"Approved"} : o));
+  };
+
+  const createOutreach = (draft) => {
+    const id = genOutreachId(outreaches);
+    const newOutreach = {
+      id,
+      title: draft.title,
+      partnerId: draft.partnerMode==="existing" ? draft.partnerId : null,
+      customPartner: draft.partnerMode==="new" ? draft.customPartnerName : null,
+      region: draft.region,
+      town: draft.town,
+      sector: draft.sector,
+      languages: draft.languages,
+      date: draft.date,
+      days: draft.days,
+      expectedAudience: draft.expectedAudience,
+      status: "Draft",
+      assigned: [],
+      perDiemStatus: "Not submitted",
+      results: null,
+      need: draft.need,
+      overrideTrainers: draft.trainersOverride,
+      overrideManagers: draft.managersOverride,
+    };
+    setOutreaches(prev => [...prev, newOutreach]);
+    setShowCreate(false);
+    setOpenId(id);
+  };
+
+  return (
+    <div>
+      <div className="section-head">
+        <h2>Outreach register</h2>
+        <div className="row-flex">
+          <span className="hint">{outreaches.length} logged</span>
+          {role==="senior" && <button className="btn btn-primary btn-sm" onClick={()=>setShowCreate(true)}>+ New outreach</button>}
+        </div>
+      </div>
+      <div className="card" style={{padding:0}}>
+        <table>
+          <thead><tr><th style={{width:28}}>#</th><th>Outreach</th><th>Region</th><th>Date</th><th>Audience</th><th>Team</th><th>Status</th><th>Per diem</th><th></th></tr></thead>
+          <tbody>
+            {outreaches.map((o,i)=>{
+              const target = getTeamTarget(o);
+              const urgent = o.perDiemStatus==="Pending Accounting" && daysUntil(o.date)<=3 && daysUntil(o.date)>=0;
+              return (
+                <tr key={o.id}>
+                  <td className="ledger-idx">{String(i+1).padStart(2,"0")}</td>
+                  <td><strong>{o.title}</strong><div className="muted" style={{fontSize:11.5}}>{partnerName(o, partners)} · {o.town}</div></td>
+                  <td>{o.region}</td>
+                  <td className="mono">{fmtDate(o.date)}</td>
+                  <td className="mono">{o.expectedAudience}</td>
+                  <td>{o.assigned.length}/{target.total}</td>
+                  <td>{statusPill(o.status)}</td>
+                  <td>{perDiemStamp(o.perDiemStatus, urgent)}</td>
+                  <td><button className="btn btn-ghost btn-sm" onClick={()=>setOpenId(o.id)}>Open →</button></td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {showCreate && (
+        <CreateOutreachModal
+          partners={partners}
+          onClose={()=>setShowCreate(false)}
+          onCreate={createOutreach}
+        />
+      )}
+
+      {open && (
+        <OutreachDetail
+          outreach={open}
+          partnerLabel={partnerName(open, partners)}
+          staff={staff}
+          role={role}
+          onClose={()=>setOpenId(null)}
+          onToggleAssign={(sid)=>toggleAssign(open.id, sid)}
+          onSubmit={()=>submitForApproval(open.id)}
+          onApprove={()=>approve(open.id)}
+          onApprovePerDiem={()=>approvePerDiem(open.id)}
+        />
+      )}
+    </div>
+  );
+}
+
+function CreateOutreachModal({partners, onClose, onCreate}){
+  const [partnerMode, setPartnerMode] = useState("existing");
+  const [partnerId, setPartnerId] = useState(partners[0]?.id || "");
+  const [customPartnerName, setCustomPartnerName] = useState("");
+  const [title, setTitle] = useState("");
+  const [region, setRegion] = useState(REGIONS[0]);
+  const [customRegion, setCustomRegion] = useState("");
+  const [town, setTown] = useState("");
+  const [sector, setSector] = useState("Informal");
+  const [languages, setLanguages] = useState(["Luganda"]);
+  const [showOtherLang, setShowOtherLang] = useState(false);
+  const [customLanguage, setCustomLanguage] = useState("");
+  const [date, setDate] = useState("");
+  const [days, setDays] = useState(1);
+  const [expectedAudience, setExpectedAudience] = useState(100);
+  const [trainersOverride, setTrainersOverride] = useState("");
+  const [managersOverride, setManagersOverride] = useState("");
+  const [need, setNeed] = useState("");
+
+  const rec = recommendTeam(Number(expectedAudience)||0);
+  const toggleLang = (l) => setLanguages(prev => prev.includes(l) ? prev.filter(x=>x!==l) : [...prev, l]);
+  const addCustomLanguage = () => {
+    const val = customLanguage.trim();
+    if(val && !languages.includes(val)) setLanguages(prev => [...prev, val]);
+    setCustomLanguage("");
+    setShowOtherLang(false);
+  };
+
+  const resolvedRegion = region==="Other" ? customRegion.trim() : region;
+  const canSubmit = title.trim() && date && Number(expectedAudience) > 0 && (partnerMode==="existing" ? partnerId : customPartnerName.trim()) && town.trim() && resolvedRegion;
+
+  const handleSubmit = () => {
+    if(!canSubmit) return;
+    onCreate({
+      title: title.trim(),
+      partnerMode, partnerId, customPartnerName: customPartnerName.trim(),
+      region: resolvedRegion, town: town.trim(), sector, languages,
+      date, days: Number(days)||1, expectedAudience: Number(expectedAudience)||0,
+      trainersOverride: trainersOverride!=="" ? Number(trainersOverride) : undefined,
+      managersOverride: managersOverride!=="" ? Number(managersOverride) : undefined,
+      need: need.trim(),
+    });
+  };
+
+  return (
+    <div className="modal-back" onClick={(e)=>{if(e.target===e.currentTarget) onClose();}}>
+      <div className="modal">
+        <div className="modal-head">
+          <div>
+            <h3 style={{margin:"0 0 4px"}}>Plan a new outreach</h3>
+            <div className="muted" style={{fontSize:12.5}}>Log the who/where/when — the tool will size the team and suggest a fit-matched roster.</div>
+          </div>
+          <button className="x-close" onClick={onClose}>×</button>
+        </div>
+
+        <div className="field">
+          <label>Outreach title</label>
+          <input value={title} onChange={e=>setTitle(e.target.value)} placeholder="e.g. Kalerwe Market Sensitization & Onboarding" />
+        </div>
+
+        <div className="field">
+          <label>Partner or area</label>
+          <div className="chip-select" style={{marginBottom:10}}>
+            <span className={"chip "+(partnerMode==="existing"?"on":"")} onClick={()=>setPartnerMode("existing")}>Existing partner</span>
+            <span className={"chip "+(partnerMode==="new"?"on":"")} onClick={()=>setPartnerMode("new")}>New / unlisted partner</span>
+          </div>
+          {partnerMode==="existing" ? (
+            <select value={partnerId} onChange={e=>setPartnerId(e.target.value)}>
+              {partners.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
+          ) : (
+            <input value={customPartnerName} onChange={e=>setCustomPartnerName(e.target.value)} placeholder="Name of the partner, market, union, or area" />
+          )}
+        </div>
+
+        <div className="grid cols-2">
+          <div className="field">
+            <label>Region</label>
+            <select value={region} onChange={e=>setRegion(e.target.value)}>
+              {REGIONS.map(r=><option key={r}>{r}</option>)}
+              <option value="Other">Other (type below)</option>
+            </select>
+            {region==="Other" && (
+              <div className="other-field">
+                <input value={customRegion} onChange={e=>setCustomRegion(e.target.value)} placeholder="Enter the region name" />
+              </div>
+            )}
+          </div>
+          <div className="field">
+            <label>Town / specific site</label>
+            <input value={town} onChange={e=>setTown(e.target.value)} placeholder="e.g. Kalerwe" />
+          </div>
+        </div>
+
+        <div className="field">
+          <label>Sector</label>
+          <div className="chip-select">
+            <span className={"chip "+(sector==="Informal"?"on":"")} onClick={()=>setSector("Informal")}>Informal</span>
+            <span className={"chip "+(sector==="Formal"?"on":"")} onClick={()=>setSector("Formal")}>Formal</span>
+          </div>
+        </div>
+
+        <div className="field">
+          <label>Language(s) needed</label>
+          <div className="chip-select">
+            {LANGUAGE_OPTIONS.map(l=>(
+              <span key={l} className={"chip "+(languages.includes(l)?"on":"")} onClick={()=>toggleLang(l)}>{l}</span>
+            ))}
+            {languages.filter(l=>!LANGUAGE_OPTIONS.includes(l)).map(l=>(
+              <span key={l} className="chip on" onClick={()=>toggleLang(l)}>{l}</span>
+            ))}
+            <span className={"chip "+(showOtherLang?"on":"")} onClick={()=>setShowOtherLang(v=>!v)}>+ Other</span>
+          </div>
+          {showOtherLang && (
+            <div className="other-field row-flex" style={{gap:8}}>
+              <input value={customLanguage} onChange={e=>setCustomLanguage(e.target.value)} placeholder="Type a language" onKeyDown={e=>e.key==="Enter" && addCustomLanguage()} />
+              <button type="button" className="btn btn-ghost btn-sm" onClick={addCustomLanguage}>Add</button>
+            </div>
+          )}
+        </div>
+
+        <div className="grid cols-3">
+          <div className="field">
+            <label>Start date</label>
+            <input type="date" value={date} onChange={e=>setDate(e.target.value)} />
+          </div>
+          <div className="field">
+            <label>Duration (days)</label>
+            <input type="number" min="1" value={days} onChange={e=>setDays(e.target.value)} />
+          </div>
+          <div className="field">
+            <label>Expected participants</label>
+            <input type="number" min="1" value={expectedAudience} onChange={e=>setExpectedAudience(e.target.value)} />
+          </div>
+        </div>
+
+        <div className="callout" style={{marginTop:2}}>
+          Based on {expectedAudience || 0} expected participants, the tool recommends <strong>{rec.trainers} Trainer{rec.trainers>1?"s":""} + {rec.managers} Account Manager{rec.managers>1?"s":""}</strong>. Adjust below only if you know something the numbers don't — e.g. a difficult site, a first-time partner, or a known low-conversion history.
+        </div>
+
+        <div className="grid cols-2">
+          <div className="field">
+            <label>Trainers to send (override)</label>
+            <input type="number" min="0" value={trainersOverride} onChange={e=>setTrainersOverride(e.target.value)} placeholder={String(rec.trainers)+" (recommended)"} />
+          </div>
+          <div className="field">
+            <label>Account Managers to send (override)</label>
+            <input type="number" min="0" value={managersOverride} onChange={e=>setManagersOverride(e.target.value)} placeholder={String(rec.managers)+" (recommended)"} />
+          </div>
+        </div>
+
+        <div className="field">
+          <label>Other factors to consider</label>
+          <textarea rows="3" value={need} onChange={e=>setNeed(e.target.value)} placeholder="e.g. partner has underperformed before, site needs early-morning start, security concerns, materials required, VIP attendance expected..." />
+        </div>
+
+        <div className="divider"></div>
+        <div className="row-flex" style={{justifyContent:"flex-end", gap:10}}>
+          <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
+          <button className="btn btn-primary" disabled={!canSubmit} onClick={handleSubmit}>Create outreach</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function OutreachDetail({outreach, partnerLabel, staff, role, onClose, onToggleAssign, onSubmit, onApprove, onApprovePerDiem}){
+  const rec = getTeamTarget(outreach);
+  const assignedStaff = outreach.assigned.map(id=>staff.find(s=>s.id===id)).filter(Boolean);
+  const assignedTrainers = assignedStaff.filter(s=>s.role==="Trainer").length;
+  const assignedManagers = assignedStaff.filter(s=>s.role==="Account Manager").length;
+
+  const candidates = staff
+    .map(s=>({...s, score: fitScore(s, outreach)}))
+    .sort((a,b)=>b.score-a.score);
+  const trainerCandidates = candidates.filter(s=>s.role==="Trainer");
+  const managerCandidates = candidates.filter(s=>s.role==="Account Manager");
+
+  const overStaffed = assignedStaff.length > rec.total;
+  const understaffed = assignedStaff.length < rec.total;
+
+  return (
+    <div className="modal-back" onClick={(e)=>{if(e.target===e.currentTarget) onClose();}}>
+      <div className="modal">
+        <div className="modal-head">
+          <div>
+            <h3 style={{margin:"0 0 4px"}}>{outreach.title}</h3>
+            <div className="muted" style={{fontSize:12.5}}>{partnerLabel} · {outreach.town}, {outreach.region} · {fmtDate(outreach.date)} · {outreach.days} day(s)</div>
+          </div>
+          <button className="x-close" onClick={onClose}>×</button>
+        </div>
+
+        {outreach.need && <div className="callout" style={{marginBottom:16}}>{outreach.need}</div>}
+
+        <div className="grid cols-3" style={{marginBottom:18}}>
+          <div className="card" style={{padding:14}}>
+            <div className="muted" style={{fontSize:11}}>EXPECTED AUDIENCE</div>
+            <div className="mono" style={{fontSize:18, fontWeight:600}}>{outreach.expectedAudience}</div>
+          </div>
+          <div className="card" style={{padding:14}}>
+            <div className="muted" style={{fontSize:11}}>{rec.isOverridden ? "TEAM (MANAGER-SET)" : "RECOMMENDED TEAM"}</div>
+            <div style={{fontSize:14, fontWeight:600, marginTop:2}}>{rec.trainers} Trainer{rec.trainers!==1?"s":""} + {rec.managers} Acct. Mgr{rec.managers!==1?"s":""}</div>
+          </div>
+          <div className="card" style={{padding:14}}>
+            <div className="muted" style={{fontSize:11}}>ASSIGNED SO FAR</div>
+            <div style={{fontSize:14, fontWeight:600, marginTop:2, color: overStaffed?"var(--red)":understaffed?"var(--gold-deep)":"var(--forest-3)"}}>
+              {assignedTrainers} Trainer{assignedTrainers!==1?"s":""} + {assignedManagers} Mgr{assignedManagers!==1?"s":""}
+              {overStaffed && " — over-staffed"}
+              {understaffed && " — below recommendation"}
+            </div>
+          </div>
+        </div>
+
+        <div className="section-head" style={{margin:"18px 0 8px"}}>
+          <h2 style={{fontSize:15}}>Best-fit Trainers</h2>
+        </div>
+        {trainerCandidates.slice(0,4).map(s=>{
+          const on = outreach.assigned.includes(s.id);
+          const lbl = fitLabel(s.score);
+          return (
+            <div className="match-row" key={s.id}>
+              <Avatar name={s.name}/>
+              <div style={{flex:1}}>
+                <div className="row-flex" style={{gap:8}}>
+                  <strong style={{fontSize:13.5}}>{s.name}</strong>
+                  <span className={lbl.cls}>{lbl.label}</span>
+                  {s.status==="Deployed" && <span className="tag" style={{background:"var(--red-soft)", color:"var(--red)", borderColor:"transparent"}}>Deployed elsewhere</span>}
+                </div>
+                <div className="muted" style={{fontSize:11.5, margin:"3px 0 6px"}}>{s.homeRegion} · {s.languages.join(", ")} · {s.note}</div>
+                <div className="fit-bar"><div style={{width:s.score+"%"}}></div></div>
+              </div>
+              <button className={"btn btn-sm "+(on?"btn-danger":"btn-ghost")} disabled={role!=="senior"} onClick={()=>onToggleAssign(s.id)}>{on?"Remove":"Assign"}</button>
+            </div>
+          );
+        })}
+
+        <div className="section-head" style={{margin:"22px 0 8px"}}>
+          <h2 style={{fontSize:15}}>Best-fit Account Managers</h2>
+        </div>
+        {managerCandidates.slice(0,4).map(s=>{
+          const on = outreach.assigned.includes(s.id);
+          const lbl = fitLabel(s.score);
+          return (
+            <div className="match-row" key={s.id}>
+              <Avatar name={s.name}/>
+              <div style={{flex:1}}>
+                <div className="row-flex" style={{gap:8}}>
+                  <strong style={{fontSize:13.5}}>{s.name}</strong>
+                  <span className={lbl.cls}>{lbl.label}</span>
+                  {s.status==="Deployed" && <span className="tag" style={{background:"var(--red-soft)", color:"var(--red)", borderColor:"transparent"}}>Deployed elsewhere</span>}
+                </div>
+                <div className="muted" style={{fontSize:11.5, margin:"3px 0 6px"}}>{s.homeRegion} · {s.languages.join(", ")} · {s.note}</div>
+                <div className="fit-bar"><div style={{width:s.score+"%"}}></div></div>
+              </div>
+              <button className={"btn btn-sm "+(on?"btn-danger":"btn-ghost")} disabled={role!=="senior"} onClick={()=>onToggleAssign(s.id)}>{on?"Remove":"Assign"}</button>
+            </div>
+          );
+        })}
+
+        <div className="divider"></div>
+        <div className="row-flex" style={{justifyContent:"space-between"}}>
+          <div>
+            <div className="muted" style={{fontSize:11, marginBottom:6}}>PER DIEM STATUS</div>
+            {perDiemStamp(outreach.perDiemStatus, false)}
+          </div>
+          <div className="row-flex">
+            {role==="senior" && outreach.status==="Draft" &&
+              <button className="btn btn-primary" onClick={()=>{onSubmit(); onClose();}}>Submit for approval</button>}
+            {role==="senior" && outreach.status==="Pending Approval" &&
+              <button className="btn btn-gold" onClick={()=>{onApprove(); onClose();}}>Approve outreach plan</button>}
+            {role==="senior" && outreach.perDiemStatus==="Pending Accounting" &&
+              <button className="btn btn-primary" onClick={onApprovePerDiem}>Approve per diem</button>}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   SCHEDULE
+   ============================================================ */
+
+function ScheduleView({outreaches, staff, partners}){
+  const [filterRegion, setFilterRegion] = useState("All");
+  const sorted = [...outreaches].sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const filtered = filterRegion==="All" ? sorted : sorted.filter(o=>o.region===filterRegion);
+
+  return (
+    <div>
+      <div className="section-head">
+        <h2>Deployment schedule</h2>
+        <select style={{width:180}} value={filterRegion} onChange={e=>setFilterRegion(e.target.value)}>
+          <option>All</option>
+          {REGIONS.map(r=><option key={r}>{r}</option>)}
+        </select>
+      </div>
+      {filtered.map(o=>{
+        const assignedStaff = o.assigned.map(id=>staff.find(s=>s.id===id)).filter(Boolean);
+        return (
+          <div className="card" key={o.id} style={{marginBottom:14}}>
+            <div className="row-flex" style={{justifyContent:"space-between", marginBottom:10}}>
+              <div>
+                <strong>{o.title}</strong>
+                <div className="muted" style={{fontSize:12}}>{partnerName(o, partners)} · {o.town}, {o.region}</div>
+              </div>
+              <div style={{textAlign:"right"}}>
+                <div className="mono" style={{fontSize:13}}>{fmtDate(o.date)} · {o.days}d</div>
+                {statusPill(o.status)}
+              </div>
+            </div>
+            <div className="row-flex" style={{flexWrap:"wrap", gap:8}}>
+              {assignedStaff.length===0 && <span className="muted" style={{fontSize:12.5}}>No one assigned yet</span>}
+              {assignedStaff.map(s=>(
+                <span className="tag" key={s.id} style={{display:"flex", alignItems:"center", gap:6, padding:"5px 10px"}}>
+                  <Avatar name={s.name}/> {s.name} <span className="muted">· {s.role}</span>
+                </span>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ============================================================
+   PER DIEM
+   ============================================================ */
+
+function PerDiemView({outreaches, setOutreaches, staff, partners, role}){
+  const approvePerDiem = (id) => setOutreaches(prev => prev.map(o => o.id===id ? {...o, perDiemStatus:"Approved"} : o));
+  const queue = outreaches.filter(o=>o.perDiemStatus!=="Not submitted");
+  const fieldEntries = getFieldEntries(outreaches, staff);
+
+  return (
+    <div>
+      <div className="callout">
+        Per diem is triggered the moment a team is assigned to an outreach, so Accounting can review and approve it before departure instead of after — no figures shown here, just whether it's been signed off.
+      </div>
+      <div className="section-head">
+        <h2>Approval queue</h2>
+      </div>
+      <div className="card" style={{padding:0}}>
+        <table>
+          <thead><tr><th>Outreach</th><th>Departs</th><th>Assigned</th><th>Status</th>{role==="senior" && <th></th>}</tr></thead>
+          <tbody>
+            {queue.map(o=>{
+              const urgent = o.perDiemStatus==="Pending Accounting" && daysUntil(o.date)<=3 && daysUntil(o.date)>=0;
+              return (
+                <tr key={o.id}>
+                  <td><strong>{o.title}</strong><div className="muted" style={{fontSize:11.5}}>{partnerName(o, partners)}</div></td>
+                  <td className="mono">{fmtDate(o.date)}{urgent && <div style={{color:"var(--red)", fontSize:11}}>in {daysUntil(o.date)}d</div>}</td>
+                  <td>{o.assigned.length} staff</td>
+                  <td>{perDiemStamp(o.perDiemStatus, urgent)}</td>
+                  {role==="senior" && <td>{o.perDiemStatus==="Pending Accounting" &&
+                    <button className="btn btn-primary btn-sm" onClick={()=>approvePerDiem(o.id)}>Approve</button>}</td>}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="section-head">
+        <h2>Field time tracker</h2>
+        <span className="hint">flags staff still in the field beyond the planned duration</span>
+      </div>
+      <div className="callout">
+        This isn't about accusing anyone — it exists so a trip that quietly runs long, without matching registrations to show for it, gets caught before the next per diem cycle rather than after.
+      </div>
+      {fieldEntries.length===0 ? <div className="empty">No one is currently logged as in the field.</div> :
+      <div className="card" style={{padding:0}}>
+        <table>
+          <thead><tr><th>Staff</th><th>Role</th><th>Outreach</th><th>Planned</th><th>Day of trip</th><th>Status</th></tr></thead>
+          <tbody>
+            {fieldEntries.map((e,i)=>(
+              <tr key={i}>
+                <td><div className="row-flex"><Avatar name={e.person.name}/> <strong>{e.person.name}</strong></div></td>
+                <td>{e.person.role}</td>
+                <td>{e.outreach.title}</td>
+                <td className="mono">{e.outreach.days} day(s)</td>
+                <td className="mono">Day {e.daysElapsed}</td>
+                <td>{fieldTimeStamp(e)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>}
+    </div>
+  );
+}
+
+/* ============================================================
+   RESULTS & INSIGHTS
+   ============================================================ */
+
+function ResultsView({outreaches, partners, staff}){
+  const completed = outreaches.filter(o=>o.status==="Completed" && o.results);
+  const totalOnboarded = completed.reduce((s,o)=>s+o.results.onboarded,0);
+  const totalAttendees = completed.reduce((s,o)=>s+o.results.attendees,0);
+
+  return (
+    <div>
+      <div className="grid cols-2">
+        <KPI num={totalOnboarded} lbl="Members onboarded (completed outreaches)" />
+        <KPI num={totalAttendees? Math.round(totalOnboarded/totalAttendees*100)+"%" : "—"} lbl="Attendee → onboarding conversion" />
+      </div>
+
+      <div className="section-head"><h2>Completed outreach results</h2></div>
+      {completed.length===0 ? <div className="empty">No completed outreach logged yet.</div> :
+      <div className="card" style={{padding:0}}>
+        <table>
+          <thead><tr><th>Outreach</th><th>Date</th><th>Attendees</th><th>Onboarded</th><th>Conversion</th></tr></thead>
+          <tbody>
+            {completed.map(o=>(
+              <tr key={o.id}>
+                <td><strong>{o.title}</strong></td>
+                <td className="mono">{fmtDate(o.date)}</td>
+                <td className="mono">{o.results.attendees}</td>
+                <td className="mono">{o.results.onboarded}</td>
+                <td>{Math.round(o.results.onboarded/o.results.attendees*100)}%</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>}
+    </div>
+  );
+}
+
+/* ============================================================
+   MANAGE USERS
+   ============================================================ */
+
+function ManageUsersView({staff, seniorManagers, onAddStaff, onAddSeniorManager}){
+  const [showAdd, setShowAdd] = useState(false);
+
+  const rows = [
+    ...seniorManagers.map(m=>({id:m.id, name:m.name, accountType:"Senior Manager", detail:m.title})),
+    ...staff.map(s=>({id:s.id, name:s.name, accountType:"Field Staff", detail:s.role+" · "+s.homeRegion})),
+  ];
+
+  return (
+    <div>
+      <div className="callout">
+        This is where accounts would be provisioned in a real deployment — each row here represents a login. Adding a
+        Field Staff account here also creates their staff profile, so they immediately show up in outreach fit-matching.
+      </div>
+      <div className="section-head" style={{marginTop:0}}>
+        <h2>User accounts</h2>
+        <button className="btn btn-primary btn-sm" onClick={()=>setShowAdd(true)}>+ Add user</button>
+      </div>
+      <div className="card" style={{padding:0}}>
+        <table>
+          <thead><tr><th style={{width:28}}>#</th><th>Name</th><th>Account Type</th><th>Details</th></tr></thead>
+          <tbody>
+            {rows.map((r,i)=>(
+              <tr key={r.id}>
+                <td className="ledger-idx">{String(i+1).padStart(2,"0")}</td>
+                <td><div className="row-flex"><Avatar name={r.name}/> <strong>{r.name}</strong></div></td>
+                <td><span className="tag">{r.accountType}</span></td>
+                <td className="muted" style={{fontSize:12.5}}>{r.detail}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {showAdd && (
+        <AddUserModal
+          onClose={()=>setShowAdd(false)}
+          onCreateStaff={(draft)=>{onAddStaff(draft); setShowAdd(false);}}
+          onCreateSenior={(draft)=>{onAddSeniorManager(draft); setShowAdd(false);}}
+        />
+      )}
+    </div>
+  );
+}
+
+function AddUserModal({onClose, onCreateStaff, onCreateSenior}){
+  const [accountType, setAccountType] = useState("field");
+  const [name, setName] = useState("");
+  const [title, setTitle] = useState("");
+  const [subRole, setSubRole] = useState("Trainer");
+  const [strength, setStrength] = useState("Informal");
+  const [homeRegion, setHomeRegion] = useState(REGIONS[0]);
+  const [customRegion, setCustomRegion] = useState("");
+  const [languages, setLanguages] = useState(["Luganda"]);
+
+  const toggleLang = (l) => setLanguages(prev => prev.includes(l) ? prev.filter(x=>x!==l) : [...prev, l]);
+  const resolvedRegion = homeRegion==="Other" ? customRegion.trim() : homeRegion;
+  const canSubmit = name.trim() && (accountType==="senior" ? title.trim() : (languages.length>0 && resolvedRegion));
+
+  const handleSubmit = () => {
+    if(!canSubmit) return;
+    if(accountType==="senior"){
+      onCreateSenior({name:name.trim(), title:title.trim()});
+    } else {
+      onCreateStaff({
+        name:name.trim(), role:subRole, strength, languages, homeRegion:resolvedRegion,
+        note:"Newly added — no track record yet", formalRate:60, informalRate:60, trips:0, status:"Available",
+      });
+    }
+  };
+
+  return (
+    <div className="modal-back" onClick={(e)=>{if(e.target===e.currentTarget) onClose();}}>
+      <div className="modal">
+        <div className="modal-head">
+          <div>
+            <h3 style={{margin:"0 0 4px"}}>Add a new user</h3>
+            <div className="muted" style={{fontSize:12.5}}>Creates a login and, for Field Staff, a matching staff profile used in outreach planning.</div>
+          </div>
+          <button className="x-close" onClick={onClose}>×</button>
+        </div>
+
+        <div className="field">
+          <label>Account type</label>
+          <div className="chip-select">
+            <span className={"chip "+(accountType==="senior"?"on":"")} onClick={()=>setAccountType("senior")}>Senior Manager</span>
+            <span className={"chip "+(accountType==="field"?"on":"")} onClick={()=>setAccountType("field")}>Field Staff</span>
+          </div>
+        </div>
+
+        <div className="field">
+          <label>Full name</label>
+          <input value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. Esther Nakimuli" />
+        </div>
+
+        {accountType==="senior" ? (
+          <div className="field">
+            <label>Title</label>
+            <input value={title} onChange={e=>setTitle(e.target.value)} placeholder="e.g. Senior Manager — Partnerships (Formal Sector)" />
+          </div>
+        ) : (
+          <>
+            <div className="grid cols-2">
+              <div className="field">
+                <label>Role</label>
+                <div className="chip-select">
+                  <span className={"chip "+(subRole==="Trainer"?"on":"")} onClick={()=>setSubRole("Trainer")}>Trainer</span>
+                  <span className={"chip "+(subRole==="Account Manager"?"on":"")} onClick={()=>setSubRole("Account Manager")}>Account Manager</span>
+                  <span className={"chip "+(subRole==="Personalisation"?"on":"")} onClick={()=>setSubRole("Personalisation")}>Personalisation</span>
+                </div>
+              </div>
+              <div className="field">
+                <label>Sector strength</label>
+                <div className="chip-select">
+                  {["Informal","Formal","Both"].map(s=>(
+                    <span key={s} className={"chip "+(strength===s?"on":"")} onClick={()=>setStrength(s)}>{s}</span>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="field">
+              <label>Home region</label>
+              <select value={homeRegion} onChange={e=>setHomeRegion(e.target.value)}>
+                {REGIONS.map(r=><option key={r}>{r}</option>)}
+                <option value="Other">Other (type below)</option>
+              </select>
+              {homeRegion==="Other" && (
+                <div className="other-field">
+                  <input value={customRegion} onChange={e=>setCustomRegion(e.target.value)} placeholder="Enter the region name" />
+                </div>
+              )}
+            </div>
+            <div className="field">
+              <label>Languages</label>
+              <div className="chip-select">
+                {LANGUAGE_OPTIONS.map(l=>(
+                  <span key={l} className={"chip "+(languages.includes(l)?"on":"")} onClick={()=>toggleLang(l)}>{l}</span>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+
+        <div className="divider"></div>
+        <div className="row-flex" style={{justifyContent:"flex-end", gap:10}}>
+          <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
+          <button className="btn btn-primary" disabled={!canSubmit} onClick={handleSubmit}>Create account</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   APP SHELL
+   ============================================================ */
+
+function PersonalisationView({ partners, pipeline, staff }) {
+  const allEntities = [...partners, ...pipeline].filter(e => e.subcategory || e.earningCycle || e.sector);
+  const officerName = (id) => staff.find(s => s.id === id)?.name || "Unassigned";
+
+  return (
+    <div>
+      <div className="callout">
+        Personalisation Insights based on Needs Assessment data to identify what info/communication/marketing messaging is required for specific partnerships.
+      </div>
+      
+      <div className="section-head" style={{ marginTop: 0 }}>
+        <h2>Personalisation & Needs Assessment Insights</h2>
+        <span className="hint">Showing data for active partners and pipeline leads</span>
+      </div>
+      
+      {allEntities.length === 0 ? (
+        <div className="empty">No needs assessment data available yet. Please identify a new partner.</div>
+      ) : (
+        <div className="card" style={{ padding: 0 }}>
+          <table>
+            <thead>
+              <tr>
+                <th>Partner / Lead</th>
+                <th>Sector & Category</th>
+                <th>Earning Cycle</th>
+                <th>Size</th>
+                <th>Account Owner</th>
+                <th>Needs / Messaging Focus</th>
+              </tr>
+            </thead>
+            <tbody>
+              {allEntities.map((entity) => (
+                <tr key={entity.id}>
+                  <td>
+                    <strong>{entity.name}</strong>
+                    <div className="muted" style={{ fontSize: 11.5 }}>
+                      {entity.stage ? "Pipeline: " + entity.stage : "Active Partner"}
+                    </div>
+                  </td>
+                  <td>
+                    <div><span className="tag">{entity.sector || "Informal"}</span></div>
+                    <div className="muted" style={{ fontSize: 12, marginTop: 4 }}>{entity.subcategory || "N/A"}</div>
+                  </td>
+                  <td>
+                    {entity.earningCycle ? (
+                      <span className="pill approved"><span className="pill-dot"></span>{entity.earningCycle}</span>
+                    ) : (
+                      <span className="muted">N/A</span>
+                    )}
+                  </td>
+                  <td className="mono">{entity.orgSize || "N/A"}</td>
+                  <td className="muted" style={{ fontSize: 12.5 }}>{entity.accountOwner ? officerName(entity.accountOwner) : "N/A"}</td>
+                  <td>
+                    <div style={{ fontSize: 13, maxWidth: 250, whiteSpace: "normal" }}>
+                      {entity.additionalInfo || <span className="muted">No specific needs captured.</span>}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+function RealDataDashboard() {
+  const [fyFilter, setFyFilter] = React.useState("All");
+  const [regionFilter, setRegionFilter] = React.useState("All");
+  const [sectionFilter, setSectionFilter] = React.useState("All");
+
+  const fys = ["All", ...Array.from(new Set(EXCEL_OUTREACHES.map(e => e.fy))).sort()];
+  const regions = ["All", ...Array.from(new Set(EXCEL_OUTREACHES.map(e => e.region))).sort()];
+  const sections = ["All", ...Array.from(new Set(EXCEL_OUTREACHES.map(e => e.section))).sort()];
+
+  const filtered = EXCEL_OUTREACHES.filter(e =>
+    (fyFilter === "All" || e.fy === fyFilter) &&
+    (regionFilter === "All" || e.region === regionFilter) &&
+    (sectionFilter === "All" || e.section === sectionFilter)
+  );
+
+  const totalReach = filtered.reduce((s, e) => s + e.reach, 0);
+  const totalReg   = filtered.reduce((s, e) => s + e.registered, 0);
+  const totalEnrol = filtered.reduce((s, e) => s + e.enrolled, 0);
+  const totalEvents = filtered.length;
+  const convRate = totalReach > 0 ? ((totalEnrol / totalReach) * 100).toFixed(1) : "—";
+
+  // By region
+  const byRegion = {};
+  filtered.forEach(e => {
+    if (!byRegion[e.region]) byRegion[e.region] = {reach:0, reg:0, enrol:0, events:0};
+    byRegion[e.region].reach += e.reach;
+    byRegion[e.region].reg   += e.registered;
+    byRegion[e.region].enrol += e.enrolled;
+    byRegion[e.region].events++;
+  });
+
+  // Top partners by registrations
+  const topPartners = [...EXCEL_PARTNERS]
+    .filter(p => p.registrations > 0)
+    .sort((a,b) => b.registrations - a.registrations)
+    .slice(0, 10);
+
+  // By sector
+  const bySector = {};
+  EXCEL_PARTNERS.forEach(p => {
+    if (!bySector[p.sector]) bySector[p.sector] = 0;
+    bySector[p.sector] += p.registrations;
+  });
+  const sectorList = Object.entries(bySector).sort((a,b)=>b[1]-a[1]);
+  const maxSector = sectorList[0]?.[1] || 1;
+
+  return (
+    <div>
+      <div className="callout">
+        Live data sourced from <strong>Livelihoods Reach Dashboard</strong> and <strong>Partner Fact Sheet</strong> Excel files. Use the filters below to slice by Financial Year, Region, or Programme Section.
+      </div>
+
+      {/* Filters */}
+      <div className="row-flex" style={{gap:12, marginBottom:24, flexWrap:"wrap"}}>
+        <div className="field" style={{margin:0}}>
+          <label>Financial Year</label>
+          <select value={fyFilter} onChange={e=>setFyFilter(e.target.value)} style={{minWidth:130}}>
+            {fys.map(f=><option key={f}>{f}</option>)}
+          </select>
+        </div>
+        <div className="field" style={{margin:0}}>
+          <label>Region</label>
+          <select value={regionFilter} onChange={e=>setRegionFilter(e.target.value)} style={{minWidth:130}}>
+            {regions.map(r=><option key={r}>{r}</option>)}
+          </select>
+        </div>
+        <div className="field" style={{margin:0}}>
+          <label>Programme Section</label>
+          <select value={sectionFilter} onChange={e=>setSectionFilter(e.target.value)} style={{minWidth:130}}>
+            {sections.map(s=><option key={s}>{s}</option>)}
+          </select>
+        </div>
+      </div>
+
+      {/* KPI Row */}
+      <div className="grid cols-4" style={{marginBottom:28}}>
+        <div className="card kpi"><div className="num">{totalEvents}</div><div className="lbl">Outreach Events</div></div>
+        <div className="card kpi"><div className="num">{totalReach.toLocaleString()}</div><div className="lbl">Total Reach (Attendees)</div></div>
+        <div className="card kpi"><div className="num">{totalEnrol.toLocaleString()}</div><div className="lbl">Members Enrolled</div></div>
+        <div className="card kpi"><div className="num">{convRate}%</div><div className="lbl">Reach → Enrolment Rate</div></div>
+      </div>
+
+      <div className="grid cols-2">
+        {/* Regional Breakdown */}
+        <div className="card">
+          <div className="section-head" style={{marginTop:0}}>
+            <h2>Reach by Region</h2>
+          </div>
+          <table>
+            <thead><tr><th>Region</th><th>Events</th><th>Reach</th><th>Enrolled</th><th>Conv %</th></tr></thead>
+            <tbody>
+              {Object.entries(byRegion).sort((a,b)=>b[1].reach-a[1].reach).map(([reg, d])=>{
+                const c = d.reach > 0 ? ((d.enrol/d.reach)*100).toFixed(1) : "—";
+                const low = parseFloat(c) < 2;
+                return (
+                  <tr key={reg}>
+                    <td><strong>{reg}</strong></td>
+                    <td className="mono">{d.events}</td>
+                    <td className="mono">{d.reach.toLocaleString()}</td>
+                    <td className="mono" style={{color:"var(--forest-3)",fontWeight:600}}>{d.enrol.toLocaleString()}</td>
+                    <td>
+                      {c !== "—"
+                        ? <span className={"pill "+(low?"urgent":"approved")}><span className="pill-dot"></span>{c}%</span>
+                        : <span className="pill draft"><span className="pill-dot"></span>—</span>}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Sector Distribution */}
+        <div className="card">
+          <div className="section-head" style={{marginTop:0}}>
+            <h2>Registrations by Partner Sector</h2>
+            <span className="hint">{EXCEL_PARTNERS.length} partners total</span>
+          </div>
+          {sectorList.map(([sector, count])=>(
+            <div key={sector} style={{marginBottom:10}}>
+              <div className="row-flex" style={{justifyContent:"space-between",marginBottom:4}}>
+                <span style={{fontSize:13}}>{sector}</span>
+                <span className="mono" style={{fontSize:12,color:"var(--forest-3)",fontWeight:600}}>{count.toLocaleString()}</span>
+              </div>
+              <div className="fit-bar">
+                <div style={{width:(count/maxSector*100)+"%"}}></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Top Partners */}
+      <div className="section-head">
+        <h2>Top 10 Partners by Registrations</h2>
+        <span className="hint">From Partner Fact Sheet</span>
+      </div>
+      <div className="card" style={{padding:0}}>
+        <table>
+          <thead><tr><th>#</th><th>Partner</th><th>Sector</th><th>Registrations</th><th>Description</th></tr></thead>
+          <tbody>
+            {topPartners.map((p,i)=>(
+              <tr key={p.name}>
+                <td className="ledger-idx">{String(i+1).padStart(2,"0")}</td>
+                <td><strong>{p.name}</strong></td>
+                <td><span className="tag">{p.sector}</span></td>
+                <td className="mono" style={{color:"var(--forest-3)",fontWeight:600}}>{p.registrations.toLocaleString()}</td>
+                <td className="muted" style={{fontSize:12,maxWidth:300,whiteSpace:"normal"}}>{p.description.slice(0,120)}{p.description.length>120?"…":""}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Events Log */}
+      <div className="section-head">
+        <h2>Outreach Events Log</h2>
+        <span className="hint">{filtered.length} events shown</span>
+      </div>
+      <div className="card" style={{padding:0}}>
+        <table>
+          <thead><tr><th>#</th><th>Event</th><th>Region</th><th>Section</th><th>FY</th><th>Reach</th><th>Registered</th><th>Enrolled</th></tr></thead>
+          <tbody>
+            {filtered.slice(0,50).map((e,i)=>(
+              <tr key={i}>
+                <td className="ledger-idx">{String(i+1).padStart(2,"0")}</td>
+                <td><strong style={{fontSize:12.5}}>{e.name}</strong>{e.date && <div className="muted" style={{fontSize:11}}>{e.date}</div>}</td>
+                <td><span className="pill draft" style={{fontSize:10}}><span className="pill-dot"></span>{e.region}</span></td>
+                <td><span className="tag">{e.section}</span></td>
+                <td className="muted" style={{fontSize:12}}>{e.fy}</td>
+                <td className="mono">{e.reach.toLocaleString()}</td>
+                <td className="mono">{e.registered > 0 ? e.registered : <span className="muted">—</span>}</td>
+                <td className="mono" style={{color: e.enrolled > 0 ? "var(--forest-3)": "inherit", fontWeight: e.enrolled > 0 ? 600 : 400}}>
+                  {e.enrolled > 0 ? e.enrolled : <span className="muted">—</span>}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {filtered.length > 50 && <div style={{padding:"12px 16px",fontSize:12.5,color:"#8a8065",borderTop:"1px solid var(--line)"}}>{filtered.length - 50} more events not shown — use filters to narrow results.</div>}
+      </div>
+    </div>
+  );
+}
+
+
+const TABS = [
+  {id:"dashboard", label:"Dashboard", seniorOnly:false},
+  {id:"partners", label:"Partner Registry & Pipeline", seniorOnly:false},
+  {id:"plan", label:"Plan an Outreach", seniorOnly:true},
+  {id:"schedule", label:"Deployment Schedule", seniorOnly:false},
+  {id:"perdiem", label:"Per Diem", seniorOnly:true},
+  {id:"results", label:"Results & Insights", seniorOnly:false},
+  {id:"personalisation", label:"Personalisation Insights", seniorOnly:false},
+  {id:"livedata", label:"Live Data Dashboard", seniorOnly:false},
+  {id:"users", label:"Manage Users", seniorOnly:true},
+];
+
+const SEED_SENIOR_MANAGERS = [
+  {id:"SM01", name:"David Kintu", title:"Senior Manager — Financial Literacy"},
+  {id:"SM02", name:"Patricia Namono", title:"Senior Manager — Partnerships (Informal Sector)"},
+];
+
+function App(){
+  const [role, setRole] = useState("senior");
+  const [staff, setStaff] = useState(STAFF);
+  const [seniorManagers, setSeniorManagers] = useState(SEED_SENIOR_MANAGERS);
+  const [meId, setMeId] = useState(STAFF[0].id);
+  const [tab, setTab] = useState("dashboard");
+  const [openId, setOpenId] = useState(null);
+  const [outreaches, setOutreaches] = useState(initialOutreaches);
+  const [partners, setPartners] = useState(PARTNERS);
+  const [pipeline, setPipeline] = useState(initialPipeline);
+
+  const me = staff.find(s=>s.id===meId) || null;
+  const visibleTabs = TABS.filter(t=>!t.seniorOnly || role==="senior");
+
+  const goTo = (t, id) => { setTab(t); if(id) setOpenId(id); };
+
+  const setRoleGuarded = (nextRole) => {
+    setRole(nextRole);
+    const currentTabDef = TABS.find(t=>t.id===tab);
+    if(nextRole==="field" && currentTabDef?.seniorOnly){
+      setTab("dashboard");
+      setOpenId(null);
+    }
+  };
+
+  const addStaffMember = (draft) => {
+    const newId = "S" + String(staff.length+1).padStart(2,"0");
+    setStaff(prev => [...prev, {id:newId, ...draft}]);
+    return newId;
+  };
+
+  const addSeniorManager = (draft) => {
+    const newId = "SM" + String(seniorManagers.length+1).padStart(2,"0");
+    setSeniorManagers(prev => [...prev, {id:newId, ...draft}]);
+    return newId;
+  };
+
+  return (
+    <div className="shell">
+      <div className="rail">
+        <div className="rail-brand">
+          <div className="mark">E&amp;G Deployment Ledger</div>
+          <div className="sub">NSSF Uganda · Enterprise &amp; Growth</div>
+        </div>
+        <div>
+          {visibleTabs.map((t)=>{
+            const i = TABS.indexOf(t);
+            return (
+              <div key={t.id} className={"nav-item "+(tab===t.id?"active":"")} onClick={()=>{setTab(t.id); setOpenId(null);}}>
+                <span className="idx">{String(i+1).padStart(2,"0")}</span>{t.label}
+              </div>
+            );
+          })}
+        </div>
+        <div className="rail-foot">
+          <div className="label">Viewing as</div>
+          <div className="role-toggle">
+            <button className={role==="senior"?"active":""} onClick={()=>setRoleGuarded("senior")}>Senior Manager</button>
+            <button className={role==="field"?"active":""} onClick={()=>setRoleGuarded("field")}>Field Staff</button>
+          </div>
+          {role==="field" &&
+            <select className="who-select" value={meId} onChange={e=>setMeId(e.target.value)}>
+              {staff.map(s=><option key={s.id} value={s.id}>{s.name} — {s.role}</option>)}
+            </select>
+          }
+        </div>
+      </div>
+
+      <div className="main">
+        <div className="topbar">
+          <div className="title">{TABS.find(t=>t.id===tab)?.label}</div>
+          <div className="today">Tuesday, 21 July 2026</div>
+        </div>
+        <div className="content">
+          {tab==="dashboard" && (role==="senior"
+            ? <SeniorDashboard outreaches={outreaches} staff={staff} partners={partners} goTo={goTo}/>
+            : <FieldDashboard me={me} outreaches={outreaches} staff={staff}/>)}
+          {tab==="partners" && <PartnersView partners={partners} setPartners={setPartners} pipeline={pipeline} setPipeline={setPipeline} staff={staff} role={role}/>}
+          {tab==="plan" && role==="senior" && <PlanOutreach outreaches={outreaches} setOutreaches={setOutreaches} staff={staff} partners={partners} role={role} openId={openId} setOpenId={setOpenId}/>}
+          {tab==="schedule" && <ScheduleView outreaches={outreaches} staff={staff} partners={partners}/>}
+          {tab==="perdiem" && role==="senior" && <PerDiemView outreaches={outreaches} setOutreaches={setOutreaches} staff={staff} partners={partners} role={role}/>}
+          {tab==="results" && <ResultsView outreaches={outreaches} partners={partners} staff={staff}/>}
+          {tab==="personalisation" && <PersonalisationView partners={partners} pipeline={pipeline} staff={staff} role={role} me={me} updateEntityInsights={(id, up) => {
+            if (id.startsWith("P")) {
+              setPartners((prev) => prev.map(p => p.id === id ? { ...p, ...up } : p));
+            } else {
+              setPipeline((prev) => prev.map(l => l.id === id ? { ...l, ...up } : l));
+            }
+          }}/>}
+          {tab==="livedata" && <RealDataDashboard/>}
+          {tab==="users" && role==="senior" && <ManageUsersView staff={staff} seniorManagers={seniorManagers} onAddStaff={addStaffMember} onAddSeniorManager={addSeniorManager}/>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
 </body>
 </html>
