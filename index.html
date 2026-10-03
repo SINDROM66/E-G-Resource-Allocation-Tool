@@ -235,6 +235,7 @@
   .perdiem-banner .seg.wait .n{color:var(--gold-deep);}
 .hoverable-row:hover { background: rgba(0,0,0,0.02); }
 </style>
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 <div id="root"></div>
@@ -1759,16 +1760,33 @@ function PersonalisationView({ partners, pipeline, staff }) {
 }
 
 
+function getAllOutreaches() {
+  try {
+    const uploaded = JSON.parse(localStorage.getItem("eg_outreaches_uploaded") || "[]");
+    return [...EXCEL_OUTREACHES, ...uploaded];
+  } catch { return EXCEL_OUTREACHES; }
+}
+
+function getAllPartners() {
+  try {
+    const uploaded = JSON.parse(localStorage.getItem("eg_partners_uploaded") || "[]");
+    return [...EXCEL_PARTNERS, ...uploaded];
+  } catch { return EXCEL_PARTNERS; }
+}
+
 function RealDataDashboard() {
   const [fyFilter, setFyFilter] = React.useState("All");
   const [regionFilter, setRegionFilter] = React.useState("All");
   const [sectionFilter, setSectionFilter] = React.useState("All");
 
-  const fys = ["All", ...Array.from(new Set(EXCEL_OUTREACHES.map(e => e.fy))).sort()];
-  const regions = ["All", ...Array.from(new Set(EXCEL_OUTREACHES.map(e => e.region))).sort()];
-  const sections = ["All", ...Array.from(new Set(EXCEL_OUTREACHES.map(e => e.section))).sort()];
+  const ALL_OUTREACHES = getAllOutreaches();
+  const ALL_PARTNERS = getAllPartners();
 
-  const filtered = EXCEL_OUTREACHES.filter(e =>
+  const fys = ["All", ...Array.from(new Set(ALL_OUTREACHES.map(e => e.fy))).sort()];
+  const regions = ["All", ...Array.from(new Set(ALL_OUTREACHES.map(e => e.region))).sort()];
+  const sections = ["All", ...Array.from(new Set(ALL_OUTREACHES.map(e => e.section))).sort()];
+
+  const filtered = ALL_OUTREACHES.filter(e =>
     (fyFilter === "All" || e.fy === fyFilter) &&
     (regionFilter === "All" || e.region === regionFilter) &&
     (sectionFilter === "All" || e.section === sectionFilter)
@@ -1791,14 +1809,14 @@ function RealDataDashboard() {
   });
 
   // Top partners by registrations
-  const topPartners = [...EXCEL_PARTNERS]
+  const topPartners = [...ALL_PARTNERS]
     .filter(p => p.registrations > 0)
     .sort((a,b) => b.registrations - a.registrations)
     .slice(0, 10);
 
   // By sector
   const bySector = {};
-  EXCEL_PARTNERS.forEach(p => {
+  ALL_PARTNERS.forEach(p => {
     if (!bySector[p.sector]) bySector[p.sector] = 0;
     bySector[p.sector] += p.registrations;
   });
@@ -1875,7 +1893,7 @@ function RealDataDashboard() {
         <div className="card">
           <div className="section-head" style={{marginTop:0}}>
             <h2>Registrations by Partner Sector</h2>
-            <span className="hint">{EXCEL_PARTNERS.length} partners total</span>
+            <span className="hint">{ALL_PARTNERS.length} partners total</span>
           </div>
           {sectorList.map(([sector, count])=>(
             <div key={sector} style={{marginBottom:10}}>
@@ -1945,6 +1963,254 @@ function RealDataDashboard() {
 }
 
 
+
+/* ============================================================
+   MANAGE DATA SOURCES
+   ============================================================ */
+
+function ManageDataSources({ role }) {
+  const [uploadLog, setUploadLog] = React.useState(() => {
+    try { return JSON.parse(localStorage.getItem("eg_datasource_log") || "[]"); }
+    catch { return []; }
+  });
+  const [uploading, setUploading] = React.useState(false);
+  const [message, setMessage] = React.useState(null);
+
+  React.useEffect(() => {
+    localStorage.setItem("eg_datasource_log", JSON.stringify(uploadLog));
+  }, [uploadLog]);
+
+  const detectFileType = (headers) => {
+    const hl = headers.map(h => String(h || "").toLowerCase().trim());
+    if (hl.includes("event name") || (hl.includes("reach") && hl.some(h => h.includes("region")))) return "outreaches";
+    if (hl.includes("partners") || hl.includes("number of registrations")) return "partners";
+    return "unknown";
+  };
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    setMessage(null);
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const workbook = XLSX.read(evt.target.result, { type: "array" });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+        if (jsonData.length < 2) {
+          setMessage({ type: "error", text: "File appears empty or has no data rows." });
+          setUploading(false);
+          return;
+        }
+
+        const headers = jsonData[0].map(h => String(h || "").trim());
+        const fileType = detectFileType(headers);
+        const fileId = Date.now().toString();
+        const rows = jsonData.slice(1).filter(row => row.some(c => c != null && c !== ""));
+        let newRows = [];
+
+        if (fileType === "outreaches") {
+          newRows = rows.map(row => {
+            const obj = {};
+            headers.forEach((h, i) => { obj[h] = row[i]; });
+            return {
+              fileId,
+              name: String(obj["Event Name"] || obj[headers[0]] || "").trim(),
+              region: String(obj["Region"] || "Unknown").trim(),
+              reach: parseInt(obj["Reach "] || obj["Reach"] || 0) || 0,
+              registered: parseInt(obj["Registered"] || 0) || 0,
+              enrolled: parseInt(obj["Enrolled"] || 0) || 0,
+              fy: String(obj["FY"] || "Unknown").trim(),
+              date: obj["Date"] ? String(obj["Date"]).slice(0, 10) : null,
+              section: String(obj["Section"] || "Livelihoods").trim()
+            };
+          }).filter(r => r.name);
+
+          const prev = JSON.parse(localStorage.getItem("eg_outreaches_uploaded") || "[]");
+          localStorage.setItem("eg_outreaches_uploaded", JSON.stringify([...prev, ...newRows]));
+
+        } else if (fileType === "partners") {
+          newRows = rows.map(row => {
+            const obj = {};
+            headers.forEach((h, i) => { obj[h] = row[i]; });
+            return {
+              fileId,
+              name: String(obj["Partners"] || obj[headers[0]] || "").trim(),
+              registrations: parseInt(obj["Number of Registrations"] || obj[headers[1]] || 0) || 0,
+              sector: String(obj["Sector / Categorisation"] || obj["Sector"] || obj[headers[2]] || "Others").trim(),
+              description: String(obj["What they do?"] || obj[headers[3]] || "").trim()
+            };
+          }).filter(r => r.name);
+
+          const prev = JSON.parse(localStorage.getItem("eg_partners_uploaded") || "[]");
+          localStorage.setItem("eg_partners_uploaded", JSON.stringify([...prev, ...newRows]));
+        }
+
+        const logEntry = {
+          id: fileId,
+          filename: file.name,
+          uploadedAt: new Date().toISOString(),
+          fileType,
+          rowsAdded: newRows.length,
+          status: fileType === "unknown" ? "unrecognized" : "success"
+        };
+
+        setUploadLog(prev => [logEntry, ...prev]);
+        if (fileType === "unknown") {
+          setMessage({ type: "error", text: "File uploaded but type could not be auto-detected. Headers not recognized. Please check the file structure." });
+        } else {
+          setMessage({ type: "success", text: "Successfully added " + newRows.length + " rows from \"" + file.name + "\". The Live Data Dashboard has been updated." });
+        }
+      } catch (err) {
+        setMessage({ type: "error", text: "Failed to read file: " + err.message });
+      }
+      setUploading(false);
+    };
+    reader.readAsArrayBuffer(file);
+    e.target.value = "";
+  };
+
+  const removeFile = (fileId, filename) => {
+    if (!window.confirm("Remove all data from \"" + filename + "\"? This cannot be undone.")) return;
+
+    const prevOut = JSON.parse(localStorage.getItem("eg_outreaches_uploaded") || "[]");
+    localStorage.setItem("eg_outreaches_uploaded", JSON.stringify(prevOut.filter(r => r.fileId !== fileId)));
+
+    const prevPart = JSON.parse(localStorage.getItem("eg_partners_uploaded") || "[]");
+    localStorage.setItem("eg_partners_uploaded", JSON.stringify(prevPart.filter(r => r.fileId !== fileId)));
+
+    setUploadLog(prev => prev.filter(l => l.id !== fileId));
+    setMessage({ type: "success", text: "Data from \"" + filename + "\" has been removed." });
+  };
+
+  const totalOutreachRows = uploadLog.filter(l => l.fileType === "outreaches" && l.status === "success").reduce((s, l) => s + l.rowsAdded, 0);
+  const totalPartnerRows  = uploadLog.filter(l => l.fileType === "partners"   && l.status === "success").reduce((s, l) => s + l.rowsAdded, 0);
+
+  return (
+    <div>
+      <div className="callout">
+        Manage the Excel data sources powering the Live Data Dashboard. <strong>Only Senior Managers can upload files.</strong> Field Staff should send their Excel files to a Senior Manager who will upload them here.
+      </div>
+
+      {/* Summary KPIs */}
+      <div className="grid cols-3" style={{marginBottom:28}}>
+        <div className="card kpi">
+          <div className="num">{uploadLog.filter(l=>l.status==="success").length}</div>
+          <div className="lbl">Files Uploaded</div>
+        </div>
+        <div className="card kpi">
+          <div className="num">{totalOutreachRows.toLocaleString()}</div>
+          <div className="lbl">Outreach Rows Added</div>
+        </div>
+        <div className="card kpi">
+          <div className="num">{totalPartnerRows.toLocaleString()}</div>
+          <div className="lbl">Partner Rows Added</div>
+        </div>
+      </div>
+
+      {/* Upload Section — Senior Only */}
+      {role === "senior" ? (
+        <>
+          <div className="section-head" style={{marginTop:0}}>
+            <h2>Upload New Excel File</h2>
+          </div>
+          <div className="card">
+            <div className="row-flex" style={{gap:16, flexWrap:"wrap", alignItems:"center"}}>
+              <label htmlFor="excel-upload" className={"btn btn-primary" + (uploading ? " disabled" : "")} style={{cursor: uploading ? "not-allowed" : "pointer"}}>
+                {uploading ? "Reading file..." : "+ Upload Excel File (.xlsx)"}
+              </label>
+              <input id="excel-upload" type="file" accept=".xlsx,.xls" onChange={handleFileUpload} style={{display:"none"}} disabled={uploading} />
+              <div>
+                <div style={{fontSize:13, fontWeight:600}}>Supported file types:</div>
+                <div className="muted" style={{fontSize:12.5, marginTop:3}}>
+                  • <strong>Livelihoods Reach Dashboard</strong> — columns: Event Name, Region, Reach, Registered, Enrolled, FY, Date, Section
+                </div>
+                <div className="muted" style={{fontSize:12.5, marginTop:2}}>
+                  • <strong>Partner Fact Sheet</strong> — columns: Partners, Number of Registrations, Sector / Categorisation, What they do?
+                </div>
+              </div>
+            </div>
+            {message && (
+              <div className={"callout" + (message.type === "error" ? " warn" : "")} style={{marginTop:14, marginBottom:0}}>
+                {message.text}
+              </div>
+            )}
+          </div>
+        </>
+      ) : (
+        <div className="callout warn" style={{marginBottom:22}}>
+          <strong>Viewing only.</strong> Only Senior Managers can upload data files. Please send your Excel file to a Senior Manager who will upload it here.
+        </div>
+      )}
+
+      {/* Upload Log */}
+      <div className="section-head">
+        <h2>Data Sources Log</h2>
+        <span className="hint">{uploadLog.length} file(s) on record</span>
+      </div>
+
+      {uploadLog.length === 0 ? (
+        <div className="empty">No files uploaded yet. The Live Data Dashboard currently shows only the built-in seed data.</div>
+      ) : (
+        <div className="card" style={{padding:0}}>
+          <table>
+            <thead>
+              <tr>
+                <th style={{width:32}}>#</th>
+                <th>File Name</th>
+                <th>Data Type Detected</th>
+                <th>Rows Added</th>
+                <th>Uploaded At</th>
+                <th>Status</th>
+                {role === "senior" && <th style={{width:100}}></th>}
+              </tr>
+            </thead>
+            <tbody>
+              {uploadLog.map((log, i) => (
+                <tr key={log.id}>
+                  <td className="ledger-idx">{String(i + 1).padStart(2, "0")}</td>
+                  <td>
+                    <strong style={{fontSize:13}}>{log.filename}</strong>
+                    <div className="muted" style={{fontSize:11, marginTop:2}}>ID: {log.id}</div>
+                  </td>
+                  <td>
+                    <span className="tag">
+                      {log.fileType === "outreaches" ? "Livelihoods / Outreaches"
+                        : log.fileType === "partners" ? "Partner Fact Sheet"
+                        : "Unrecognized"}
+                    </span>
+                  </td>
+                  <td className="mono">{log.rowsAdded}</td>
+                  <td className="muted" style={{fontSize:12.5}}>{new Date(log.uploadedAt).toLocaleString("en-GB")}</td>
+                  <td>
+                    {log.status === "success"
+                      ? <span className="pill approved"><span className="pill-dot"></span>Active</span>
+                      : <span className="pill urgent"><span className="pill-dot"></span>Unrecognized</span>}
+                  </td>
+                  {role === "senior" && (
+                    <td>
+                      {log.status === "success" && (
+                        <button className="btn btn-danger btn-sm" onClick={() => removeFile(log.id, log.filename)}>
+                          Remove
+                        </button>
+                      )}
+                    </td>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
 const TABS = [
   {id:"dashboard", label:"Dashboard", seniorOnly:false},
   {id:"partners", label:"Partner Registry & Pipeline", seniorOnly:false},
@@ -1954,6 +2220,7 @@ const TABS = [
   {id:"results", label:"Results & Insights", seniorOnly:false},
   {id:"personalisation", label:"Personalisation Insights", seniorOnly:false},
   {id:"livedata", label:"Live Data Dashboard", seniorOnly:false},
+  {id:"datasources", label:"Manage Data Sources", seniorOnly:false},
   {id:"users", label:"Manage Users", seniorOnly:true},
 ];
 
@@ -2052,6 +2319,7 @@ function App(){
             }
           }}/>}
           {tab==="livedata" && <RealDataDashboard/>}
+          {tab==="datasources" && <ManageDataSources role={role}/>}
           {tab==="users" && role==="senior" && <ManageUsersView staff={staff} seniorManagers={seniorManagers} onAddStaff={addStaffMember} onAddSeniorManager={addSeniorManager}/>}
         </div>
       </div>
